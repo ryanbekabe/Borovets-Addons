@@ -1,0 +1,8 @@
+ota-required-cache=0
+ota-type=BLOCK
+post-build=xiaomi/whyred/whyred:8.1.0/OPM1.171019.011/8.12.27:user/release-keys
+post-build-incremental=9.0.0
+post-sdk-level=28
+post-security-patch-level=2018-12-01
+post-timestamp=1546005505
+pre-device=whyred

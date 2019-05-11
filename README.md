@@ -1,5 +1,3 @@
-***
-
 # Borovets Addons [AROMA]
 
 ## Описание

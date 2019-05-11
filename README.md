@@ -15,7 +15,7 @@
 ## Контактная информация
 
 Владелец: Borovets Original<br />
-Автор: Evgeniy Borovets<br />
+Автор: Evgeniy Borovets
 Электронная почта: <a href="mailto:stein.borovets@gmail.com">stein.borovets@gmail.com</a><br />
 Исходный код: <a href="https://github.com/borovets">GitHub</a>
 

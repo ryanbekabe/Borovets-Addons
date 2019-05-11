@@ -10,15 +10,17 @@
 
 ### Инициализация версии ПО
 
-`manifest.txt`
+`
+manifest.txt
+`
 
 ## Контактная информация
 
-* Владелец: _Borovets Original_
-* Автор: _Evgeniy Borovets_
-* Электронная почта: _[stein.borovets@gmail.com](mailto:stein.borovets@gmail.com)_
-* Исходный код: _[Github](https://github.com/borovets/Borovets-Addons)_
+* Владелец: Borovets Original
+* Автор: Evgeniy Borovets
+* Электронная почта: [stein.borovets@gmail.com](mailto:stein.borovets@gmail.com)
+* Исходный код: [Github](https://github.com/borovets/Borovets-Addons)
 
 ## Лицензия
 
-_© [Borovets Original, 2014-2019](LICENSE.md)_
+© [Borovets Original, 2014-2019](LICENSE.md)

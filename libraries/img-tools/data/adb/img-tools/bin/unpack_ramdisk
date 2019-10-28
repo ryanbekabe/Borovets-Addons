@@ -1,0 +1,12 @@
+#!/system/bin/bash
+
+if [ -z $1 ]; then
+	echo "Usage: unpack_ramdisk <ramdiskFile>"
+	exit 0
+fi
+
+mkdir ramdisk
+
+cd ramdisk
+
+gunzip -c ../$1 | cpio -i

@@ -1,0 +1,53 @@
+function getopt(argc, argv, options, thisopt, i) {
+	if (length(options) == 0)
+		return -1
+	if (argv[Optind] == "--") {
+		Optind++
+		_opti = 0
+		return -1
+	} else if (argv[Optind] !~ /^-[^:[:space:]]/) {
+		_opti = 0
+		return -1
+	}
+	if (_opti == 0)
+		_opti = 2
+	thisopt = substr(argv[Optind], _opti, 1)
+	Optopt = thisopt
+	i = index(options, thisopt)
+	if (i == 0) {
+		if (Opterr)
+			printf("%c -- invalid option\n", thisopt) > "/dev/stderr"
+		if (_opti >= length(argv[Optind])) {
+			Optind++
+			_opti = 0
+		} else
+			_opti++
+		return "?"
+	}
+	if (substr(options, i + 1, 1) == ":") {
+		if (length(substr(argv[Optind], _opti + 1)) > 0)
+			Optarg = substr(argv[Optind], _opti + 1)
+		else
+			Optarg = argv[++Optind]
+		_opti = 0
+	} else
+		Optarg = ""
+	if (_opti == 0 || _opti >= length(argv[Optind])) {
+		Optind++
+		_opti = 0
+	} else
+		_opti++
+	return thisopt
+}
+
+BEGIN {
+	Opterr = 1
+	Optind = 1
+	if (_getopt_test) {
+		while ((_go_c = getopt(ARGC, ARGV, "ab:cd")) != -1)
+			printf("c = <%c>, Optarg = <%s>\n", _go_c, Optarg)
+		printf("non-option arguments:\n")
+		for (; Optind < ARGC; Optind++)
+			printf("\tARGV[%d] = <%s>\n", Optind, ARGV[Optind])
+	}
+}

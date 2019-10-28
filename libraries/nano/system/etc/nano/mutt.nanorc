@@ -1,0 +1,6 @@
+# Here is an example for quoted E-mails
+
+syntax mutt
+
+color green "^>.*"
+color yellow start="^>* ?-- $" end="^>* ?$"

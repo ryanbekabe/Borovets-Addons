@@ -1,0 +1,18 @@
+# Syntax highlighting for OCaml
+
+syntax ocaml "\.mli?$"
+magic "OCaml"
+comment "(*|*)"
+
+color red "\<[A-Z][0-9a-z_]{2,}\>"
+color green "\<(let|val|method|in|and|rec|private|virtual|constraint)\>"
+color red "\<(type|open|class|module|exception|external)\>"
+color blue "\<(fun|function|functor|match|try|with)\>"
+color yellow "\<(as|when|of)\>"
+color cyan "\<(if|then|else)\>"
+color magenta "\<(begin|end|object|struct|sig|for|while|do|done|to|downto)\>"
+color green "\<(true|false)\>"
+color green "\<(include|inherit|initializer)\>"
+color yellow "\<(new|ref|mutable|lazy|assert|raise)\>"
+color white start="\(\*" end="\*\)"
+color brightblack ""[^\"]*""

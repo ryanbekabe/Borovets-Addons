@@ -1,0 +1,15 @@
+# Syntax highlighting for JSON files
+
+syntax json "\.json$"
+comment ""
+color green ":[[:space:]]*\-?(0|[1-9][0-9]*)(\.[0-9]+)?([Ee]?[-+]?[0-9]+)?"
+color brightmagenta "\".+\""
+color green ":[[:space:]]*\"#[0-9abcdefABCDEF]+\""
+color green "\\\\" "\\\"" "\\[bfnrt]" "\\u[0-9abcdefABCDEF]{4})"
+color green "(true|false|null)"
+color brightblue "\"[^"]+\"[[:space:]]*:"
+color brightblue "\[" "\]"
+color brightred "\{" "\}"
+color brightred "," ":"
+color cyan "(^|[[:space:]]+)(//|#).*"
+color ,green "[[:space:]]+$"

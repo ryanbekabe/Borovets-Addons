@@ -1,0 +1,16 @@
+# Here is an example for XML files
+
+syntax xml "\.([jrsx]html?|jnlp|mml|pom|rng|sgml?|svg|w[as]dl|wsdd|xjb|xml|xs(d|lt?)|xul)$"
+header "<\?xml.*version=.*\?>"
+magic "(XML|SGML) (sub)?document"
+comment "<!--|-->"
+
+color green start="<" end=">"
+color green start="<" end=">"
+color cyan "<[^> ]+" ">"
+color cyan "<[^> ]+" ">"
+color magenta "\"[^"]*\""
+color yellow start="<!DOCTYPE" end="[/]?>"
+color yellow start="<!--" end="-->"
+color red "&[^;]*;"
+color red "&[^;]*;"

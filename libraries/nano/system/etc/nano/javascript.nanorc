@@ -1,0 +1,14 @@
+# Syntax highlighting for JavaScript
+
+syntax javascript "\.js$"
+comment "//"
+
+color green "\<(async|class|const|extends|function|let|this|typeof|var|void)\>"
+color brightyellow "\<(do|while|if|else|switch|case|default|for|each|in|of|with)\>"
+color brightyellow "\<(await|export|import|throw|try|catch|finally|new|delete)\>"
+color magenta "\<(break|continue|return|yield)\>"
+color cyan "\<[0-9]+\>" "\<0x[0-9A-Fa-f]+\>"
+color brightmagenta ""(\\.|[^"])*"" "'(\\.|[^'])*'" "`(\\.|[^`])*`"
+color brightblue "(^|[[:space:]])//.*"
+color brightblue start="/\*" end="\*/"
+color ,green "[[:space:]]+$"

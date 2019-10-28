@@ -1,0 +1,12 @@
+# Here is an example for APT's sources list
+
+syntax sources.list "sources\.list(\.d/.*\.list)?(~|\.old|\.save)?$"
+comment "#"
+
+color brightmagenta "^deb.*"
+color brightred "^deb(-src)?\s+.*((ftp|https?|rsh|ssh|copy|file|spacewalk|tor):/\S+|cdrom:\[.+\]/)\s+\S+"
+color brightgreen "^deb(-src)?\s+.*(ftp|https?|rsh|ssh|copy|file|spacewalk|tor):/\S+"
+color brightgreen "^deb(-src)?\s+.*cdrom:\[.+\]/"
+color brightcyan "^deb(-src)?\s+\[.+\]\s+"
+color yellow "^deb(-src)?"
+color brightblue "#.*"

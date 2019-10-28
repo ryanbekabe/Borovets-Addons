@@ -1,0 +1,13 @@
+# Here is an example for Makefiles
+
+syntax makefile "(/((GNU)?m|M)akefile[^/]*$|\.(make|mk)$)"
+magic "makefile script"
+comment "#"
+
+color red " (:?:|\+|\?)?= "
+color magenta "^(if|ifn?def|ifn?eq|else|endif|(-|s)?include)\>"
+color magenta "^((override +)?(un)?define|endef|(un)?export|private|vpath)\>"
+color blue "\$+[{(][a-zA-Z0-9_-]+[})]"
+color brightblue "^[^ 	]+:"
+color green "(^|[[:space:]]+)#.*"
+color ,green "[[:space:]]+$"

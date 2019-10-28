@@ -1,0 +1,15 @@
+# Here is an example for Autoconf
+
+syntax autoconf "\.(ac|m4)$"
+comment "#"
+
+color yellow "\<(if|test|then|elif|else|fi|for|in|do|done)\>"
+color yellow "(=|!=|&&|\|\|)"
+color cyan "\<[[:upper:]_[:digit:]]+\>"
+color red "\<[-_.0-9]+\>"
+color red "\"[^"]*\"" "\'[^']*\'"
+color green "`[^`]*`"
+color brightred "^[[:space:]]*\*\*\*.*"
+color magenta "\[|\]|\(|\)"
+color blue "^[[:blank:]]*#.*" "\<dnl.*"
+color ,green "[[:space:]]+$"

@@ -1,0 +1,15 @@
+# Here is an example for Patch files
+
+syntax patch "\.(patch|diff|debdiff)$"
+magic "diff output"
+comment ""
+
+color brightgreen "^\+.*"
+color ,green "[[:space:]]+$"
+color brightblue "^ .*"
+color brightred "^-.*"
+color magenta "^(Index:|diff)[[:blank:]].*"
+color red "^---.*"
+color green "^\+\+\+.*"
+color brightyellow "^@@.*"
+color cyan start="^---$" end="^$"

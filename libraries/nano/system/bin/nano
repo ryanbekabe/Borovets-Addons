@@ -1,0 +1,19 @@
+#!/system/bin/sh
+
+dir="$(cd "$(dirname "$0")"; pwd)"
+
+if [ "$1" == "--term" ]; then
+	term=$2
+	shift 2
+else
+	term=screen
+fi
+
+clear
+
+resize >/dev/null
+
+TERMINFO="/system/etc/terminfo"
+TERM=$term
+
+$dir/nano.bin "$@"

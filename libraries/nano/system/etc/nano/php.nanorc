@@ -1,0 +1,18 @@
+# Here is an example for PHP
+
+syntax php "\.ph(p[23457s~]?|tml)$"
+magic "PHP script"
+comment "//"
+
+color brightgreen "(<\?(php)?|\?>)"
+color white "\<[A-Za-z_][A-Za-z_0-9]*\("
+color cyan "\$[A-Za-z_][A-Za-z_0-9]*"
+color green "\<(array|bool|callable|const|float|global|int|object|string|var)\>"
+color brightcyan "\<(abstract|as|class|clone|(end)?declare|extends|function|implements|include(_once)?|inst(ance|ead)of|interface|namespace|new|private|protected|public|require(_once)?|static|trait|use|yield)\>"
+color brightcyan "\<(case|catch|default|do|echo|else(if)?|end(for(each)?|if|switch|while)|final(ly)?|for(each)?|if|print|switch|throw|try|while)\>"
+color brightcyan "\<(and|or|xor)\>"
+color magenta "\<(break|continue|goto|return)\>"
+color brightyellow ""(\.|[^"])*"" "'(\.|[^'])*'"
+color brightblue "(^|[[:space:]]+)//.*"
+color brightblue start="/\*" end="\*/"
+color ,green "[[:space:]]+$"

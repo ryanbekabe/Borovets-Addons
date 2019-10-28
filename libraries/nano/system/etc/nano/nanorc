@@ -1,0 +1,5 @@
+# Sample initialization file for GNU Nano
+
+# Include various source coloring files
+
+include "/system/etc/nano/*.nanorc"

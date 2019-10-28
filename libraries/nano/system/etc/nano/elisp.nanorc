@@ -1,0 +1,22 @@
+# Here is an example for Emacs Lisp
+
+syntax elisp "\.el$"
+magic "Lisp/Scheme program"
+comment ";"
+
+color brightcyan "\<(if|when|unless|cond|and|or|lambda|let|progn|while|dolist|dotimes)\>"
+color brightcyan "\<save-((window-)?excursion|restriction)\>"
+color brightcyan "\<eval-(and|when)-compile\>"
+color brightcyan "\<def(un|macro|subst|generic|alias)\>"
+color brightcyan "\<cl-def(un|macro|subst|generic|struct|type)\>"
+color brightcyan "\<define-(derived|minor|generic)-mode\>"
+color brightcyan "\<def(class|const|var(-local|alias)?)\>"
+color brightcyan "\<def(custom|face|group|theme)\>"
+color brightcyan "\<(setq(-default|-local)?|setf|push|pop|declare(-function)?)\>"
+color brightcyan "\<(require|provide)\>"
+color brightyellow "#?'\<(\w|-)+\>"
+color brightred "\<(t|nil)\>"
+color blue ":(\w|[?-])+"
+color yellow start="^[[:blank:]]+\"" end="[^\]\""
+color yellow ""(\\.|[^"])*""
+color cyan "(^|[[:space:]]);.*"

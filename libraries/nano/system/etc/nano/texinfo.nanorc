@@ -1,0 +1,13 @@
+# Here is an example for Texinfo files
+
+syntax texinfo "\.texi$"
+header "^\\input texinfo"
+magic "Texinfo source"
+comment "@c "
+
+color cyan "^@[a-z]+[[:space:]]+.*$"
+color brightmagenta "@[a-zA-Z]+\{[^}]*\}"
+color yellow "@[a-zA-Z]+\{?" "\}"
+color brightred "^\*[[:space:]]+.*::.*"
+color green "@c[[:space:]]+.*"
+color ,green "[[:space:]]+$"

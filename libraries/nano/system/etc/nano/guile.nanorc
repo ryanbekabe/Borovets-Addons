@@ -1,0 +1,16 @@
+# Here is an example for Guile Scheme
+
+syntax guile "\.scm$"
+header "^#!.*guile"
+comment ";"
+
+color green "\<(do|if|lambda|let(rec)?|map|unless|when)\>"
+color brightcyan "\<define(-macro|-module|-public|-syntax)?\>"
+color brightyellow "'\<(\w|-)+\>"
+color brightmagenta "#\\."
+color brightmagenta "#\\\w+\>"
+color brightred "(#t|#f)\>"
+color blue "#?:(\w|[?-])+"
+color yellow start="^[[:blank:]]+\"" end="[^\]\""
+color yellow ""(\\.|[^"])*""
+color cyan "(^|[[:space:]]);.*"

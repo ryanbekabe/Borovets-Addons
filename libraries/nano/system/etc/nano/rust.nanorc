@@ -1,0 +1,17 @@
+# Syntax highlighting for Rust
+
+syntax rust "\.(rlib|rs)$"
+comment "//"
+
+color magenta "fn [a-z_0-9]+"
+color yellow "\<(abstract|alignof|as|become|box|break|const|continue|crate|do|else|enum|extern|false|final|fn|for|if|impl|in|let|loop|macro|match|mod|move|mut|offsetof|override|priv|pub|pure|ref|return|sizeof|static|self|struct|super|true|trait|type|typeof|unsafe|unsized|use|virtual|where|while|yield)\>"
+color red "[a-z_]+!"
+color magenta "[A-Z][A-Z_0-9]+"
+color magenta "[A-Z][A-Za-z0-9]+"
+color green "\".*\""
+color green start="\".*\\$" end=".*\""
+color green start="r#+\"" end="\"#+"
+color blue "//.*"
+color blue start="/\*" end="\*/"
+color magenta start="#!\[" end="\]"
+color brightcyan "(XXX|TODO|FIXME|\?\?\?)"

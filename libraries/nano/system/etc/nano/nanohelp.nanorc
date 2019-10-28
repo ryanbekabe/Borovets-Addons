@@ -1,0 +1,7 @@
+# This is meant for highlighting key combos in a Nano help text
+
+syntax nanohelp
+
+color cyan "\^[]4-8A-Z^\_◀▶▲▼]"  "[◀▶▲▼]"  "\<M-."  "\<F1?[0-9]"
+color cyan "\<((Sh-)?Tab|Enter|Ins|(Sh-\^?)?Del|Space|Bsp|Up|Down|Left|Right|Home|End|PgUp|PgDn)\>"
+color brightred "'(\^|M-)'"

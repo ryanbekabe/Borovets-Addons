@@ -1,0 +1,8 @@
+#!/system/bin/sh
+
+dir="$(cd "$(dirname "$0")"; pwd)"
+
+export HOME="/data/misc/adb"
+export TMPDIR="/data/local/tmp"
+
+$dir/adb.bin "$@"

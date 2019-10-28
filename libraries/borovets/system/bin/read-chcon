@@ -1,0 +1,91 @@
+#!/system/bin/sh
+
+# BOROVETS SCRIPT
+
+script_date="2019.10.01"
+script_version="10.0"
+
+script_home="${0}"
+script_folder="$(cd "$(dirname "${0}")"; pwd)"
+script_name="${0##*/}"
+
+if [ -d "/storage/1FD1-1DEF" ]; then
+	storage="storage/1FD1-1DEF"
+else
+		if [ -d "/external_sd" ]; then
+			storage="external_sd"
+		else
+			if [ -d "/sdcard1" ]; then
+				storage="sdcard1"
+			else
+				storage="sdcard"
+			fi
+		fi
+fi
+
+folder_twrp="$storage/TWRP"
+folder_borovets="$folder_twrp/BOROVETS"
+folder_backup="$folder_borovets/BACKUP"
+folder_firmware="$folder_borovets/FIRMWARE"
+folder_profile="$folder_borovets/PROFILE"
+
+if [ ! -d "/$folder_twrp" ]; then
+	mkdir "/$folder_twrp"
+fi
+
+chown -R 0.0 "/$folder_twrp"
+chmod 0777 "/$folder_twrp"
+
+if [ ! -d "/$folder_backup" ]; then
+	mkdir -p "/$folder_backup"
+fi
+
+if [ ! -d "/$folder_firmware" ]; then
+	mkdir -p "/$folder_firmware"
+fi
+
+if [ ! -d "/$folder_profile" ]; then
+	mkdir -p "/$folder_profile"
+fi
+
+# HELP
+text_h() {
+	echo "read-chcon $script_version"
+	echo "[Дамп значений политики безопасности SELinux]"
+	echo ""
+	echo "Пример: $script_name \"./data/adb\""
+	echo "Команда: ln -1aZ \"./data/adb\""
+}
+
+# VERSION
+text_v() {
+	echo "О скрипте: read-chcon"
+	echo ""
+	echo "Скрипт: $script_home"
+	echo ""
+	echo "Версия: $script_version"
+	echo "Дата сборки: $script_date"
+	echo "Разработчик: Evgeniy Borovets"
+	echo "Поддержка: stein.borovets@gmail.com"
+	echo "Исходный код: https://github.com/borovets"
+	echo ""
+	echo "© Borovets Original, 2014-2019"
+}
+
+if [ ! -z "$1" ]; then
+	 if [ ! -d "$1" ]; then
+		echo "Команда: ln -1aZ \"/system\" \"/vendor\""
+		find "/system" "/vendor" | while read object; do
+			ls -1aZ "$object" | grep -v -E "(configs_file|firmware_file|system_file|vendor_file)" | sed "s/\t */ /g; s/  */ \"/g; s/^ *//g; s/^u/chcon u/g; s/$/\"/g" | sort -d &>> "/$folder_backup/chcon.sh"
+		done
+	else
+		echo "Команда: ln -1aZ \"$1\""
+		find "$1" | while read object; do
+			ls -1aZ "$object" | grep -v -E "(configs_file|firmware_file|system_file|vendor_file)" | sed "s/\t */ /g; s/  */ \"/g; s/^ *//g; s/^u/chcon u/g; s/$/\"/g" | sort -d &>> "/$folder_backup/chcon.sh"
+		done
+	fi
+else
+	text_h
+	echo ""
+	text_v
+fi

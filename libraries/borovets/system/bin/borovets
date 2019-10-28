@@ -1,0 +1,1129 @@
+﻿### BOROVETS SCRIPT
+
+# BUILD
+
+if [ -f "$(cd $(dirname ${0}); pwd)/borovets-functions" ]; then
+	. "$(cd $(dirname ${0}); pwd)/borovets-functions"
+else
+	. "/system/bin/borovets-functions"
+fi
+
+## HELP
+
+# HELP MAIN
+text_h() {
+	echo "Borovets Script $script_version"
+	echo ""
+	echo "[Набор команд и скриптов для управления устройством]"
+	echo ""
+	echo "Синтаксис: borovets [-функция] [--команда] [аргументы]"
+	echo ""
+	echo "Основные функции:"
+	echo ""
+	echo "-backup / targz"
+	echo "[Архивирование данных в архив *.TAR.GZ формата]"
+	echo "-restore / un-targz"
+	echo "[Восстановление данных из архива *.TAR.GZ формата]"
+	echo ""
+	echo "-dump"
+	echo "[Дамп разделов памяти в снимок *.RAW образа]"
+	echo "-flash"
+	echo "[Прошивка разделов памяти из снимка *.RAW образа]"
+	echo ""
+	echo "-list / read-uid"
+	echo "[Список файлов по разрешениям и заданным путям]"
+	echo "-time"
+	echo "[Установка меток времени создания файлов]"
+	echo ""
+	echo "-help"
+	echo "[Перечень функций и команд для работы со скриптом]"
+	echo "-version"
+	echo "[Отображение версии и лицензионного соглашения]"
+}
+
+# HELP BACKUP
+text_bh() {
+	echo "Бэкап в архив: backup"
+	echo ""
+	echo "-backup --full"
+	echo "	[все перечисленные разделы]"
+	echo "-backup --apps (app, priv-app)"
+	echo "-backup --binaries (bin, xbin)"
+	echo "-backup --etc (addon.d, etc, usr)"
+	echo "-backup --libraries (lib, lib64)"
+	echo "-backup --symlinks (system, vendor)"
+	echo "-backup --custom [файл] [путь]"
+}
+
+# HELP BACKUP CUSTOM
+text_bch() {
+	echo "Бэкап в архив: backup --custom [файл] [путь]"
+	echo ""
+	echo "Пример: $script_name -b --c \"adb\" \"./data/adb\""
+	echo "Команда: tar zcpf \"/$folder_backup/adb.tar.gz\" \"./data/adb\""
+}
+
+# HELP BACKUP TARGZ
+text_tgzh() {
+	echo "Бэкап в TAR.GZ: targz [файл] [путь]"
+	echo ""
+	echo "Пример: $script_name targz \"adb\" \"./data/adb\""
+	echo "Команда: tar zcpf \"/$folder_backup/adb.tar.gz\" \"./data/adb\""
+}
+
+# HELP RESTORE
+text_rh() {
+	echo "Извлечение из архива: restore"
+	echo ""
+	echo "-restore --full"
+	echo "	[все перечисленные разделы]"
+	echo "-restore --apps (app, priv-app)"
+	echo "-restore --binaries (bin, xbin)"
+	echo "-restore --etc (addon.d, etc, usr)"
+	echo "-restore --libraries (lib, lib64)"
+	echo "-restore --symlinks (system, vendor)"
+	echo "-restore --custom [файл] [путь]"
+}
+
+# HELP RESTORE CUSTOM
+text_rch() {
+	echo "Извлечение из архива: restore --custom [файл] [путь]"
+	echo ""
+	echo "Пример: $script_name -r --c \"adb\" \"./data/adb\""
+	echo "Команда: tar zcpf \"/$folder_backup/adb.tar.gz\" -C \"./data/adb\""
+}
+
+# HELP RESTORE UN-TARGZ
+text_utgzh() {
+	echo "Извлечение из TAR.GZ: un-targz [файл] [путь]"
+	echo ""
+	echo "Пример: $script_name un-targz \"adb\" \"./data/adb\""
+	echo "Команда: tar zxpf \"/$folder_backup/adb.tar.gz\" -C \"./data/adb\""
+}
+
+# HELP DUMP
+text_dh() {
+	echo "Снимок раздела: dump"
+	echo ""
+	echo "-dump --full"
+	echo "	[все системные разделы]"
+	echo "-dump --bluetooth (btfm)"
+	echo "-dump --boot"
+	echo "-dump --modem (non-hlos)"
+	echo "-dump --modem1 (efs1)"
+	echo "-dump --modem2 (efs2)"
+	echo "-dump --persist"
+	echo "-dump --persistbak"
+	echo "-dump --recovery"
+	echo "-dump --splash"
+	echo "-dump --tz"
+	echo "-dump --vmeta"
+	echo "-dump --custom [файл] [раздел]"
+}
+
+# HELP DUMP CUSTOM
+text_dch() {
+	echo "Снимок раздела: dump --custom [файл] [раздел]"
+	echo ""
+	echo "Пример: $script_name -d --c \"boot-dump\" \"boot\""
+	echo "Команда: dd if=\"/dev/block/bootdevice/by-name/boot\" of=\"/$folder_firmware/boot-dump.img\""
+}
+
+# HELP FLASH
+text_fh() {
+	echo "Прошивка раздела: flash"
+	echo ""
+	echo "-flash --full"
+	echo "	[все системные разделы]"
+	echo "-flash --bluetooth (btfm)"
+	echo "-flash --boot"
+	echo "-flash --modem (non-hlos)"
+	echo "-flash --modem1 (efs1)"
+	echo "-flash --modem2 (efs2)"
+	echo "-flash --persist"
+	echo "-flash --persistbak"
+	echo "-flash --recovery"
+	echo "-flash --splash"
+	echo "-flash --tz"
+	echo "-flash --vmeta"
+	echo "-flash --custom [файл] [раздел]"
+}
+
+# HELP FLASH CUSTOM
+text_fch() {
+	echo "Прошивка раздела: flash --custom [файл] [раздел]"
+	echo ""
+	echo "Пример: $script_name -f --c \"boot-dump\" \"boot\""
+	echo "Команда: dd if=\"/$folder_firmware/boot-dump.img\" of=\"/dev/block/bootdevice/by-name/boot\""
+}
+
+# HELP LIST
+text_lh() {
+	echo "Перечень файлов: list"
+	echo ""
+	echo "-list --full"
+	echo "	[все перечисленные разделы]"
+	echo "-list --apps (app, priv-app)"
+	echo "-list --binaries (bin, xbin)"
+	echo "-list --etc (addon.d, etc, usr)"
+	echo "-list --libraries (lib, lib64)"
+	echo "-list --permissions (system, vendor)"
+	echo "-list --symlinks (system, vendor)"
+	echo "-list --custom [путь]"
+}
+
+# HELP LIST CUSTOM
+text_lch() {
+	echo "Список файлов: list --custom [путь]"
+	echo ""
+	echo "Пример # 1: $script_name -l --c \"adb\""
+	echo "Команда: tar --list --file \"./sdcard/adb.tar.gz\""
+	echo ""
+	echo "Пример # 2: borovets -l --c \"./data/adb\""
+	echo "Команда: find \"./data/adb\" -type f -o -type d -o -type l | sort -d"
+}
+
+# HELP TIME
+text_th() {
+	echo "Метка времени создания: -time"
+	echo ""
+	echo "-time --full"
+	echo "	[все перечисленные разделы]"
+	echo "-time --files (system, vendor)"
+	echo "-time --folders (system, vendor)"
+	echo "-time --symlinks (data, system, vendor)"
+	echo "-time --custom [время] [путь]"
+}
+
+# HELP VERSION
+text_v() {
+	echo "О скрипте: Borovets Script"
+	echo ""
+	echo "Скрипт: $script_home"
+	echo "Раздел памяти: /$storage"
+	echo "Путь с данными: /$folder_borovets"
+	echo "Хранилище: /$folder_repository"
+	echo ""
+	echo "Версия: $script_version"
+	echo "Дата сборки: $script_date"
+	echo "Разработчик: Evgeniy Borovets"
+	echo "Поддержка: stein.borovets@gmail.com"
+	echo "Исходный код: https://github.com/borovets"
+	echo ""
+	echo "© Borovets Original, 2014-2020"
+}
+
+### SCRIPT
+
+case "${1}" in
+	## BACKUP
+	-backup|-b|backup|b)
+		case "${2}" in
+			# BACKUP HELP
+			--help|--h|-help|-h|help|h|"")
+				text_bh
+				exit
+			;;
+			# BACKUP FULL
+			--f|-full|-f|full|f)
+				tar zcpf "/$folder_backup/apps.tar.gz" "/system/app" "/system/data-app" "/system/priv-app" "/system/package" "/system/product/app" "/system/product/overly" "/system/product/priv-app" "/vendor/app" "/vendor/data-app" "/vendor/odm/app" "/vendor/odm/overlay" "/vendor/odm/priv-app" "/vendor/overlay" "/vendor/package" 2>/dev/null
+				tar zcpf "/$folder_backup/binaries.tar.gz" "/data/adb" "/data/local" "/system/apex" "/system/bin" "/system/product/bin" "/system/product/xbin" "/system/xbin" "/vendor/bin" "/vendor/odm/bin" 2>/dev/null
+				tar zcpf "/$folder_backup/etc.tar.gz" "/system/addon.d" "/system/etc" "/system/product/etc" "/system/usr" "/vendor/etc" "/vendor/odm" "/vendor/usr" 2>/dev/null
+				tar zcpf "/$folder_backup/libraries.tar.gz" "/system/lib" "/system/lib64" "/system/product/lib" "/system/product/lib64" "/vendor/lib" "/vendor/lib64" "/vendor/odm/lib" "/vendor/odm/lib64" 2>/dev/null
+				tar zcpf "/$folder_backup/symlinks.tar.gz" `find "/data/adb" "/data/dalvik-cache" "/data/local" "/system" "/vendor" -type l` 2>/dev/null
+				exit
+			;;
+			# BACKUP APPS
+			--apps|--a|-apps|-a|apps|a)
+				tar zcpf "/$folder_backup/apps.tar.gz" "/system/app" "/system/data-app" "/system/priv-app" "/system/package" "/system/product/app" "/system/product/overly" "/system/product/priv-app" "/vendor/app" "/vendor/data-app" "/vendor/odm/app" "/vendor/odm/overlay" "/vendor/odm/priv-app" "/vendor/overlay" "/vendor/package" 2>/dev/null
+				exit
+			;;
+			# BACKUP BINARIES
+			--binaries|--b|-binaries|-b|binaries|b)
+				tar zcpf "/$folder_backup/binaries.tar.gz" "/data/adb" "/data/local" "/system/apex" "/system/bin" "/system/product/bin" "/system/product/xbin" "/system/xbin" "/vendor/bin" "/vendor/odm/bin" 2>/dev/null
+				exit
+			;;
+			# BACKUP ETC
+			--e|-etc|-e|etc|e)
+				tar zcpf "/$folder_backup/etc.tar.gz" "/system/addon.d" "/system/etc" "/system/product/etc" "/system/usr" "/vendor/etc" "/vendor/odm/etc" "/vendor/usr" 2>/dev/null
+				exit
+			;;
+			# BACKUP LIBRARIES
+			--libraries|--l|-libraries|-l|libraries|l)
+				tar zcpf "/$folder_backup/libraries.tar.gz" "/system/lib" "/system/lib64" "/system/product/lib" "/system/product/lib64" "/vendor/lib" "/vendor/lib64" "/vendor/odm/lib" "/vendor/odm/lib64" 2>/dev/null
+				exit
+			;;
+			# BACKUP SYMLINKS
+			--symlinks|--s|-symlinks|-s|symlinks|s)
+				tar zcpf "/$folder_backup/symlinks.tar.gz" `find "/data/adb" "/data/dalvik-cache" "/data/local" "/system" "/vendor" -type l` 2>/dev/null
+				exit
+			;;
+			# BACKUP CUSTOM
+			--custom|--c|-custom|-c|custom|c)
+				case "${3}" in
+					# BACKUP CUSTOM HELP
+					---help|---h|--help|--h|-help|-h|help|h|"")
+						text_bch
+						exit
+					;;
+					# BACKUP CUSTOM USAGE
+					"${3}")
+						case "${4}" in
+							"")
+								echo "Отсутствует аргумент: ${3}.tar.gz"
+								exit
+							;;
+							"${4}")
+								if [ -f "${4}" -o -d "${4}" ]; then
+									tar zcpf "/$folder_backup/${3}.tar.gz" "${4}"
+									exit
+								else
+									echo "Неверный путь: ${4}"
+									exit
+								fi
+							;;
+						esac
+					;;
+				esac
+			;;
+		esac
+	;;
+	## BACKUP TARGZ
+	-targz|-tgz|targz|tgz)
+		case "${2}" in
+			# BACKUP TARGZ HELP
+			--help|--h|-help|-h|help|h|"")
+				text_tgzh
+				exit
+			;;
+			# BACKUP TARGZ USAGE
+			"${2}")
+				case "${3}" in
+					"")
+						echo "Отсутствует аргумент: ${2}.tar.gz"
+						exit
+					;;
+					"${3}")
+						if [ -f "${3}" -o -d "${3}" ]; then
+							tar zcpf "/$folder_backup/${2}.tar.gz" "${3}"
+							exit
+						else
+							echo "Неверный путь: ${3}"
+							exit
+						fi
+					;;
+				esac
+			;;
+		esac
+	;;
+	## RESTORE
+	-restore|-r|restore|r)
+		case "${2}" in
+			# RESTORE HELP
+			--help|--h|-help|-h|help|h|"")
+				text_rh
+				exit
+			;;
+			# RESTORE FULL
+			--f|-full|-f|full|f)
+				tar zxpf "/$folder_backup/apps.tar.gz" -C "/" 2>/dev/null
+				tar zxpf "/$folder_backup/binaries.tar.gz" -C "/" 2>/dev/null
+				tar zxpf "/$folder_backup/etc.tar.gz" -C "/" 2>/dev/null
+				tar zxpf "/$folder_backup/libraries.tar.gz" -C "/" 2>/dev/null
+				tar zxpf "/$folder_backup/symlinks.tar.gz" -C "/" 2>/dev/null
+				exit
+			;;
+			# RESTORE APPS
+			--apps|--a|-apps|-a|apps|a)
+				tar zxpf "/$folder_backup/apps.tar.gz" -C "/" 2>/dev/null
+				exit
+			;;
+			# RESTORE BINARIES
+			--binaries|--b|-binaries|-b|binaries|b)
+				tar zxpf "/$folder_backup/binaries.tar.gz" -C "/" 2>/dev/null
+				exit
+			;;
+			# RESTORE ETC
+			--e|-etc|-e|etc|e)
+				tar zxpf "/$folder_backup/binaries.tar.gz" -C "/" 2>/dev/null
+				exit
+			;;
+			# RESTORE LIBRARIES
+			--libraries|--l|-libraries|-l|libraries|l)
+				tar zxpf "/$folder_backup/libraries.tar.gz" -C "/" 2>/dev/null
+				exit
+			;;
+			# RESTORE SYMLINKS
+			--symlinks|--s|-symlinks|-s|symlinks|s)
+				tar zxpf "/$folder_backup/symlinks.tar.gz" -C "/" 2>/dev/null
+				exit
+			;;
+			# RESTORE CUSTOM
+			--custom|--c|-custom|-c|custom|c)
+				case "${3}" in
+					# RESTORE CUSTOM HELP
+					---help|---h|--help|--h|-help|-h|help|h|"")
+						text_rch
+						exit
+					;;
+					# RESTORE CUSTOM USAGE
+					"${3}")
+						case "${4}" in
+							"")
+								echo "Отсутствует аргумент: ${3}.tar.gz"
+								exit
+							;;
+							"${4}")
+								if [ -f "/$folder_backup/${3}.tar.gz" ] && [ -d "${4}" ]; then
+									tar zxpf "/$folder_backup/${3}.tar.gz" -C "${4}"
+									exit
+								else
+									echo "Неверный путь: ${4}"
+									exit
+								fi
+							;;
+						esac
+					;;
+				esac
+			;;
+		esac
+	;;
+	## RESTORE UN-TARGZ
+	-un-targz|-untargz|-utgz|un-targz|untargz|utgz)
+		case "${2}" in
+			# RESTORE UN-TARGZ HELP
+			--help|--h|-help|-h|help|h|"")
+				text_utgzh
+				exit
+			;;
+			# RESTORE UN-TARGZ USAGE
+			"${2}")
+				case "${3}" in
+					"")
+						echo "Отсутствует аргумент: ${2}.tar.gz"
+						exit
+					;;
+					"${3}")
+						if [ -f "/$folder_backup/${2}.tar.gz" ] && [ -d "${3}" ]; then
+							tar zxpf "/$folder_backup/${2}.tar.gz" -C "${3}"
+							exit
+						else
+							echo "Неверный путь: ${3}"
+							exit
+						fi
+					;;
+				esac
+			;;
+		esac
+	;;
+	## DUMP
+	-dump|-d|dump|d)
+		case "${2}" in
+			# DUMP HELP
+			--help|--h|-help|-h|help|h|"")
+				text_dh
+				exit
+			;;
+			# DUMP FULL
+			--f|-full|-f|full|f)
+				if [ -f "/dev/block/bootdevice/by-name/abl" ]; then
+					dd if="/dev/block/bootdevice/by-name/abl" of="/$folder_firmware/abl.img" 2>/dev/null
+				fi
+				if [ -f "/dev/block/bootdevice/by-name/apdp" ]; then
+					dd if="/dev/block/bootdevice/by-name/apdp" of="/$folder_firmware/apdp.img" 2>/dev/null
+				fi
+				if [ -f "/dev/block/bootdevice/by-name/bk1" ]; then
+					dd if="/dev/block/bootdevice/by-name/bk1" of="/$folder_firmware/bk1.img" 2>/dev/null
+				fi
+				if [ -f "/dev/block/bootdevice/by-name/bk2" ]; then
+					dd if="/dev/block/bootdevice/by-name/bk2" of="/$folder_firmware/bk2.img" 2>/dev/null
+				fi
+				if [ -f "/dev/block/bootdevice/by-name/bluetooth" ]; then
+					dd if="/dev/block/bootdevice/by-name/bluetooth" of="/$folder_firmware/bluetooth.img" 2>/dev/null
+				fi
+				if [ -f "/dev/block/bootdevice/by-name/boot" ]; then
+					dd if="/dev/block/bootdevice/by-name/boot" of="/$folder_firmware/boot.img" 2>/dev/null
+				fi
+				if [ -f "/dev/block/bootdevice/by-name/cmnlib" ]; then
+					dd if="/dev/block/bootdevice/by-name/cmnlib" of="/$folder_firmware/cmnlib.img" 2>/dev/null
+				fi
+				if [ -f "/dev/block/bootdevice/by-name/cmnlib64" ]; then
+					dd if="/dev/block/bootdevice/by-name/cmnlib64" of="/$folder_firmware/cmnlib64.img" 2>/dev/null
+				fi
+				if [ -f "/dev/block/bootdevice/by-name/devcfg" ]; then
+					dd if="/dev/block/bootdevice/by-name/devcfg" of="/$folder_firmware/devcfg.img" 2>/dev/null
+				fi
+				if [ -f "/dev/block/bootdevice/by-name/devinfo" ]; then
+					dd if="/dev/block/bootdevice/by-name/devinfo" of="/$folder_firmware/devinfo.img" 2>/dev/null
+				fi
+				if [ -f "/dev/block/bootdevice/by-name/dip" ]; then
+					dd if="/dev/block/bootdevice/by-name/dip" of="/$folder_firmware/dip.img" 2>/dev/null
+				fi
+				if [ -f "/dev/block/bootdevice/by-name/dpo" ]; then
+					dd if="/dev/block/bootdevice/by-name/dpo" of="/$folder_firmware/dpo.img" 2>/dev/null
+				fi
+				if [ -f "/dev/block/bootdevice/by-name/dsp" ]; then
+					dd if="/dev/block/bootdevice/by-name/dsp" of="/$folder_firmware/dspso.img" 2>/dev/null
+				fi
+				if [ -f "/dev/block/bootdevice/by-name/dtbo" ]; then
+					dd if="/dev/block/bootdevice/by-name/dtbo" of="/$folder_firmware/dtbo.img" 2>/dev/null
+				fi
+				if [ -f "/dev/block/bootdevice/by-name/frp" ]; then
+					dd if="/dev/block/bootdevice/by-name/frp" of="/$folder_firmware/frp.img" 2>/dev/null
+				fi
+				if [ -f "/dev/block/bootdevice/by-name/fsc" ]; then
+					dd if="/dev/block/bootdevice/by-name/fsc" of="/$folder_firmware/fsc.img" 2>/dev/null
+				fi
+				if [ -f "/dev/block/bootdevice/by-name/fsg" ]; then
+					dd if="/dev/block/bootdevice/by-name/fsg" of="/$folder_firmware/fsg.img" 2>/dev/null
+				fi
+				if [ -f "/dev/block/bootdevice/by-name/hyp" ]; then
+					dd if="/dev/block/bootdevice/by-name/hyp" of="/$folder_firmware/hyp.img" 2>/dev/null
+				fi
+				if [ -f "/dev/block/bootdevice/by-name/keymaster" ]; then
+					dd if="/dev/block/bootdevice/by-name/keymaster" of="/$folder_firmware/keymaster.img" 2>/dev/null
+				fi
+				if [ -f "/dev/block/bootdevice/by-name/keystore" ]; then
+					dd if="/dev/block/bootdevice/by-name/keystore" of="/$folder_firmware/keystore.img" 2>/dev/null
+				fi
+				if [ -f "/dev/block/bootdevice/by-name/limits" ]; then
+					dd if="/dev/block/bootdevice/by-name/limits" of="/$folder_firmware/limits.img" 2>/dev/null
+				fi
+				if [ -f "/dev/block/bootdevice/by-name/logdump" ]; then
+					dd if="/dev/block/bootdevice/by-name/logdump" of="/$folder_firmware/logdump.img" 2>/dev/null
+				fi
+				if [ -f "/dev/block/bootdevice/by-name/logfs" ]; then
+					dd if="/dev/block/bootdevice/by-name/logfs" of="/$folder_firmware/logfs.img" 2>/dev/null
+				fi
+				if [ -f "/dev/block/bootdevice/by-name/mdtp" ]; then
+					dd if="/dev/block/bootdevice/by-name/mdtp" of="/$folder_firmware/mdtp.img" 2>/dev/null
+				fi
+				if [ -f "/dev/block/bootdevice/by-name/mdtpsecapp" ]; then
+					dd if="/dev/block/bootdevice/by-name/mdtpsecapp" of="/$folder_firmware/mdtpsecapp.img" 2>/dev/null
+				fi
+				if [ -f "/dev/block/bootdevice/by-name/misc" ]; then
+					dd if="/dev/block/bootdevice/by-name/misc" of="/$folder_firmware/misc.img" 2>/dev/null
+				fi
+				if [ -f "/dev/block/bootdevice/by-name/modem" ]; then
+					dd if="/dev/block/bootdevice/by-name/modem" of="/$folder_firmware/modem.img" 2>/dev/null
+				fi
+				if [ -f "/dev/block/bootdevice/by-name/modemst1" ]; then
+					dd if="/dev/block/bootdevice/by-name/modemst1" of="/$folder_firmware/modemst1.img" 2>/dev/null
+				fi
+				if [ -f "/dev/block/bootdevice/by-name/modemst2" ]; then
+					dd if="/dev/block/bootdevice/by-name/modemst2" of="/$folder_firmware/modemst2.img" 2>/dev/null
+				fi
+				if [ -f "/dev/block/bootdevice/by-name/msadp" ]; then
+					dd if="/dev/block/bootdevice/by-name/msadp" of="/$folder_firmware/msadp.img" 2>/dev/null
+				fi
+				if [ -f "/dev/block/bootdevice/by-name/persist" ]; then
+					dd if="/dev/block/bootdevice/by-name/persist" of="/$folder_firmware/persist.img" 2>/dev/null
+				fi
+				if [ -f "/dev/block/bootdevice/by-name/persistbak" ]; then
+					dd if="/dev/block/bootdevice/by-name/persistbak" of="/$folder_firmware/persistbak.img" 2>/dev/null
+				fi
+				if [ -f "/dev/block/bootdevice/by-name/pmic" ]; then
+					dd if="/dev/block/bootdevice/by-name/pmic" of="/$folder_firmware/pmic.img" 2>/dev/null
+				fi
+				if [ -f "/dev/block/bootdevice/by-name/rawdump" ]; then
+					dd if="/dev/block/bootdevice/by-name/rawdump" of="/$folder_firmware/rawdump.img" 2>/dev/null
+				fi
+				if [ -f "/dev/block/bootdevice/by-name/recovery" ]; then
+					dd if="/dev/block/bootdevice/by-name/recovery" of="/$folder_firmware/recovery.img" 2>/dev/null
+				fi
+				if [ -f "/dev/block/bootdevice/by-name/rpm" ]; then
+					dd if="/dev/block/bootdevice/by-name/rpm" of="/$folder_firmware/rpm.img" 2>/dev/null
+				fi
+				if [ -f "/dev/block/bootdevice/by-name/sec" ]; then
+					dd if="/dev/block/bootdevice/by-name/sec" of="/$folder_firmware/sec.img" 2>/dev/null
+				fi
+				if [ -f "/dev/block/bootdevice/by-name/splash" ]; then
+					dd if="/dev/block/bootdevice/by-name/splash" of="/$folder_firmware/splash.img" 2>/dev/null
+				fi
+				if [ -f "/dev/block/bootdevice/by-name/sti" ]; then
+					dd if="/dev/block/bootdevice/by-name/sti" of="/$folder_firmware/sti.img" 2>/dev/null
+				fi
+				if [ -f "/dev/block/bootdevice/by-name/storesec" ]; then
+					dd if="/dev/block/bootdevice/by-name/storesec" of="/$folder_firmware/storesec.img" 2>/dev/null
+				fi
+				if [ -f "/dev/block/bootdevice/by-name/switch" ]; then
+					dd if="/dev/block/bootdevice/by-name/switch" of="/$folder_firmware/switch.img" 2>/dev/null
+				fi
+				if [ -f "/dev/block/bootdevice/by-name/toolsfv" ]; then
+					dd if="/dev/block/bootdevice/by-name/toolsfv" of="/$folder_firmware/toolsfv.img" 2>/dev/null
+				fi
+				if [ -f "/dev/block/bootdevice/by-name/tz" ]; then
+					dd if="/dev/block/bootdevice/by-name/tz" of="/$folder_firmware/tz.img" 2>/dev/null
+				fi
+				if [ -f "/dev/block/bootdevice/by-name/vmeta" ]; then
+					dd if="/dev/block/bootdevice/by-name/vmeta" of="/$folder_firmware/vmeta.img" 2>/dev/null
+				fi
+				if [ -f "/dev/block/bootdevice/by-name/xbl" ]; then
+					dd if="/dev/block/bootdevice/by-name/xbl" of="/$folder_firmware/xbl.img" 2>/dev/null
+				fi
+				exit
+			;;
+			# DUMP BLUETOOTH
+			--btfm|--bluetooth|-btfm|-bluetooth|btfm|bluetooth)
+				if [ -f "/dev/block/bootdevice/by-name/bluetooth" ]; then
+					dd if="/dev/block/bootdevice/by-name/bluetooth" of="/$folder_firmware/bluetooth.img"
+				fi
+				exit
+			;;
+			# DUMP BOOT
+			--boot|-boot|boot)
+				if [ -f "/dev/block/bootdevice/by-name/boot" ]; then
+					dd if="/dev/block/bootdevice/by-name/boot" of="/$folder_firmware/boot.img"
+				fi
+				exit
+			;;
+			# DUMP MODEM
+			--non-hlos|--modem|-non-hlos|-modem|non-hlos|modem)
+				if [ -f "/dev/block/bootdevice/by-name/boot" ]; then
+					dd if="/dev/block/bootdevice/by-name/modem" of="/$folder_firmware/modem.img"
+				fi
+				exit
+			;;
+			# DUMP MODEM1
+			--efs1|--modemst1|-efs1|-modemst1|efs1|modemst1)
+				if [ -f "/dev/block/bootdevice/by-name/modemst1" ]; then
+					dd if="/dev/block/bootdevice/by-name/modemst1" of="/$folder_firmware/modemst1.img"
+				fi
+				exit
+			;;
+			# DUMP MODEM2
+			--efs2|--modemst2|-efs2|-modemst2|efs2|modemst2)
+				if [ -f "/dev/block/bootdevice/by-name/modemst2" ]; then
+					dd if="/dev/block/bootdevice/by-name/modemst2" of="/$folder_firmware/modemst2.img"
+				fi
+				exit
+			;;
+			# DUMP PERSIST
+			--persist|-persist|persist)
+				if [ -f "/dev/block/bootdevice/by-name/persist" ]; then
+					dd if="/dev/block/bootdevice/by-name/persist" of="/$folder_firmware/persist.img"
+				fi
+				exit
+			;;
+			# DUMP PERSISTBAK
+			--persistbak|-persistbak|persistbak)
+				if [ -f "/dev/block/bootdevice/by-name/persistbak" ]; then
+					dd if="/dev/block/bootdevice/by-name/persistbak" of="/$folder_firmware/persistbak.img"
+				fi
+				exit
+			;;
+			# DUMP RECOVERY
+			--recovery|-recovery|recovery)
+				if [ -f "/dev/block/bootdevice/by-name/recovery" ]; then
+					dd if="/dev/block/bootdevice/by-name/recovery" of="/$folder_firmware/recovery.img"
+				fi
+				exit
+			;;
+			# DUMP SPLASH
+			--splash|-splash|splash)
+				if [ -f "/dev/block/bootdevice/by-name/splash" ]; then
+					dd if="/dev/block/bootdevice/by-name/splash" of="/$folder_firmware/splash.img"
+				fi
+				exit
+			;;
+			# DUMP TZ
+			--tz|-tz|tz)
+				if [ -f "/dev/block/bootdevice/by-name/tz" ]; then
+					dd if="/dev/block/bootdevice/by-name/tz" of="/$folder_firmware/tz.img"
+				fi
+				exit
+			;;
+			# DUMP VMETA
+			--vmeta|-vmeta|vmeta)
+				if [ -f "/dev/block/bootdevice/by-name/vmeta" ]; then
+					dd if="/dev/block/bootdevice/by-name/vmeta" of="/$folder_firmware/vmeta.img"
+				fi
+				exit
+			;;
+			# DUMP CUSTOM
+			--custom|--c|-custom|-c|custom|c)
+				case "${3}" in
+					# DUMP CUSTOM HELP
+					---help|---h|--help|--h|-help|-h|help|h|"")
+						text_dch
+						exit
+					;;
+					# DUMP CUSTOM USAGE
+					"${3}")
+						case "${4}" in
+							"")
+								echo "Отсутствует аргумент: ${3}.img"
+								exit
+							;;
+							"${4}")
+								if [ -f "/dev/block/bootdevice/by-name/${4}" ]; then
+									dd if="/dev/block/bootdevice/by-name/${4}" of="/$folder_firmware/${3}.img"
+									exit
+								else
+									echo "Неверный путь: /dev/block/bootdevice/by-name/${4}"
+									exit
+								fi
+							;;
+						esac
+					;;
+				esac
+			;;
+		esac
+	;;
+	## FLASH
+	-flash|-f|flash|f)
+		case "${2}" in
+			# FLASH HELP
+			--help|--h|-help|-h|help|h|"")
+				text_fh
+				exit
+			;;
+			# FLASH FULL
+			--f|-full|-f|full|f)
+				if [ -f "/$folder_firmware/abl.img" ] && [ -f "/dev/block/bootdevice/by-name/abl" ]; then
+ 					dd if="/$folder_firmware/abl.img" of="/dev/block/bootdevice/by-name/abl" 2>/dev/null
+				fi
+				if [ -f "/$folder_firmware/apdp.img" ] && [ -f "/dev/block/bootdevice/by-name/apdp" ]; then
+ 					dd if="/$folder_firmware/apdp.img" of="/dev/block/bootdevice/by-name/apdp" 2>/dev/null
+				fi
+				if [ -f "/$folder_firmware/bk1.img" ] && [ -f "/dev/block/bootdevice/by-name/bk1" ]; then
+ 					dd if="/$folder_firmware/bk1.img" of="/dev/block/bootdevice/by-name/bk1" 2>/dev/null
+				fi
+				if [ -f "/$folder_firmware/bk2.img" ] && [ -f "/dev/block/bootdevice/by-name/bk2" ]; then
+ 					dd if="/$folder_firmware/bk2.img" of="/dev/block/bootdevice/by-name/bk2" 2>/dev/null
+				fi
+				if [ -f "/$folder_firmware/bluetooth.img" ] && [ -f "/dev/block/bootdevice/by-name/bluetooth" ]; then
+ 					dd if="/$folder_firmware/bluetooth.img" of="/dev/block/bootdevice/by-name/bluetooth" 2>/dev/null
+				fi
+				if [ -f "/$folder_firmware/boot.img" ] && [ -f "/dev/block/bootdevice/by-name/boot" ]; then
+ 					dd if="/$folder_firmware/boot.img" of="/dev/block/bootdevice/by-name/boot" 2>/dev/null
+				fi
+				if [ -f "/$folder_firmware/cmnlib.img" ] && [ -f "/dev/block/bootdevice/by-name/cmnlib" ]; then
+ 					dd if="/$folder_firmware/cmnlib.img" of="/dev/block/bootdevice/by-name/cmnlib" 2>/dev/null
+				fi
+				if [ -f "/$folder_firmware/cmnlib64" ] && [ -f "/dev/block/bootdevice/by-name/cmnlib64" ]; then
+ 					dd if="/$folder_firmware/cmnlib64.img" of="/dev/block/bootdevice/by-name/cmnlib64" 2>/dev/null
+				fi
+				if [ -f "/$folder_firmware/devcfg.img" ] && [ -f "/dev/block/bootdevice/by-name/devcfg" ]; then
+ 					dd if="/$folder_firmware/devcfg.img" of="/dev/block/bootdevice/by-name/devcfg" 2>/dev/null
+				fi
+				if [ -f "/$folder_firmware/devinfo.img" ] && [ -f "/dev/block/bootdevice/by-name/devinfo" ]; then
+ 					dd if="/$folder_firmware/devinfo.img" of="/dev/block/bootdevice/by-name/devinfo" 2>/dev/null
+				fi
+				if [ -f "/$folder_firmware/dip.img" ] && [ -f "/dev/block/bootdevice/by-name/dip" ]; then
+ 					dd if="/$folder_firmware/dip.img" of="/dev/block/bootdevice/by-name/dip" 2>/dev/null
+				fi
+				if [ -f "/$folder_firmware/dpo.img" ] && [ -f "/dev/block/bootdevice/by-name/dpo" ]; then
+ 					dd if="/$folder_firmware/dpo.img" of="/dev/block/bootdevice/by-name/dpo" 2>/dev/null
+				fi
+				if [ -f "/$folder_firmware/dsp.img" ] && [ -f "/dev/block/bootdevice/by-name/dspso" ]; then
+ 					dd if="/$folder_firmware/dsp.img" of="/dev/block/bootdevice/by-name/dspso" 2>/dev/null
+				fi
+				if [ -f "/$folder_firmware/dtbo.img" ] && [ -f "/dev/block/bootdevice/by-name/dtbo" ]; then
+ 					dd if="/$folder_firmware/dtbo.img" of="/dev/block/bootdevice/by-name/dtbo" 2>/dev/null
+				fi
+				if [ -f "/$folder_firmware/frp.img" ] && [ -f "/dev/block/bootdevice/by-name/frp" ]; then
+ 					dd if="/$folder_firmware/frp.img" of="/dev/block/bootdevice/by-name/frp" 2>/dev/null
+				fi
+				if [ -f "/$folder_firmware/fsc.img" ] && [ -f "/dev/block/bootdevice/by-name/fsc" ]; then
+ 					dd if="/$folder_firmware/fsc.img" of="/dev/block/bootdevice/by-name/fsc" 2>/dev/null
+				fi
+				if [ -f "/$folder_firmware/fsg.img" ] && [ -f "/dev/block/bootdevice/by-name/fsg" ]; then
+ 					dd if="/$folder_firmware/fsg.img" of="/dev/block/bootdevice/by-name/fsg" 2>/dev/null
+				fi
+				if [ -f "/$folder_firmware/hyp.img" ] && [ -f "/dev/block/bootdevice/by-name/hyp" ]; then
+ 					dd if="/$folder_firmware/hyp.img" of="/dev/block/bootdevice/by-name/hyp" 2>/dev/null
+				fi
+				if [ -f "/$folder_firmware/keymaster.img" ] && [ -f "/dev/block/bootdevice/by-name/keymaster" ]; then
+ 					dd if="/$folder_firmware/keymaster.img" of="/dev/block/bootdevice/by-name/keymaster" 2>/dev/null
+				fi
+				if [ -f "/$folder_firmware/keystore.img" ] && [ -f "/dev/block/bootdevice/by-name/keystore" ]; then
+ 					dd if="/$folder_firmware/keystore.img" of="/dev/block/bootdevice/by-name/keystore" 2>/dev/null
+				fi
+				if [ -f "/$folder_firmware/limits.img" ] && [ -f "/dev/block/bootdevice/by-name/limits" ]; then
+ 					dd if="/$folder_firmware/limits.img" of="/dev/block/bootdevice/by-name/limits" 2>/dev/null
+				fi
+				if [ -f "/$folder_firmware/logdump.img" ] && [ -f "/dev/block/bootdevice/by-name/logdump" ]; then
+ 					dd if="/$folder_firmware/logdump.img" of="/dev/block/bootdevice/by-name/logdump" 2>/dev/null
+				fi
+				if [ -f "/$folder_firmware/logfs.img" ] && [ -f "/dev/block/bootdevice/by-name/logfs" ]; then
+ 					dd if="/$folder_firmware/logfs.img" of="/dev/block/bootdevice/by-name/logfs" 2>/dev/null
+				fi
+				if [ -f "/$folder_firmware/mdtp.img" ] && [ -f "/dev/block/bootdevice/by-name/mdtp" ]; then
+ 					dd if="/$folder_firmware/mdtp.img" of="/dev/block/bootdevice/by-name/mdtp" 2>/dev/null
+				fi
+				if [ -f "/$folder_firmware/mdtpsecapp.img" ] && [ -f "/dev/block/bootdevice/by-name/mdtpsecapp" ]; then
+ 					dd if="/$folder_firmware/mdtpsecapp.img" of="/dev/block/bootdevice/by-name/mdtpsecapp" 2>/dev/null
+				fi
+				if [ -f "/$folder_firmware/misc.img" ] && [ -f "/dev/block/bootdevice/by-name/misc" ]; then
+ 					dd if="/$folder_firmware/misc.img" of="/dev/block/bootdevice/by-name/misc" 2>/dev/null
+				fi
+				if [ -f "/$folder_firmware/modem.img" ] && [ -f "/dev/block/bootdevice/by-name/modem" ]; then
+ 					dd if="/$folder_firmware/modem.img" of="/dev/block/bootdevice/by-name/modem" 2>/dev/null
+				fi
+				if [ -f "/$folder_firmware/modemst1" ] && [ -f "/dev/block/bootdevice/by-name/modemst1" ]; then
+ 					dd if="/$folder_firmware/modemst1.img" of="/dev/block/bootdevice/by-name/modemst1" 2>/dev/null
+				fi
+				if [ -f "/$folder_firmware/modemst2" ] && [ -f "/dev/block/bootdevice/by-name/modemst2" ]; then
+ 					dd if="/$folder_firmware/modemst2.img" of="/dev/block/bootdevice/by-name/modemst2" 2>/dev/null
+				fi
+				if [ -f "/$folder_firmware/msadp.img" ] && [ -f "/dev/block/bootdevice/by-name/msadp" ]; then
+ 					dd if="/$folder_firmware/msadp.img" of="/dev/block/bootdevice/by-name/msadp" 2>/dev/null
+				fi
+				if [ -f "/$folder_firmware/persist.img" ] && [ -f "/dev/block/bootdevice/by-name/persist" ]; then
+ 					dd if="/$folder_firmware/persist.img" of="/dev/block/bootdevice/by-name/persist" 2>/dev/null
+				fi
+				if [ -f "/$folder_firmware/persistbak.img" ] && [ -f "/dev/block/bootdevice/by-name/persistbak" ]; then
+ 					dd if="/$folder_firmware/persistbak.img" of="/dev/block/bootdevice/by-name/persistbak" 2>/dev/null
+				fi
+				if [ -f "/$folder_firmware/pmic.img" ] && [ -f "/dev/block/bootdevice/by-name/pmic" ]; then
+ 					dd if="/$folder_firmware/pmic.img" of="/dev/block/bootdevice/by-name/pmic" 2>/dev/null
+				fi
+				if [ -f "/$folder_firmware/rawdump.img" ] && [ -f "/dev/block/bootdevice/by-name/rawdump" ]; then
+ 					dd if="/$folder_firmware/rawdump.img" of="/dev/block/bootdevice/by-name/rawdump" 2>/dev/null
+				fi
+				if [ -f "/$folder_firmware/recovery.img" ] && [ -f "/dev/block/bootdevice/by-name/recovery" ]; then
+ 					dd if="/$folder_firmware/recovery.img" of="/dev/block/bootdevice/by-name/recovery" 2>/dev/null
+				fi
+				if [ -f "/$folder_firmware/rpm.img" ] && [ -f "/dev/block/bootdevice/by-name/rpm" ]; then
+ 					dd if="/$folder_firmware/rpm.img" of="/dev/block/bootdevice/by-name/rpm" 2>/dev/null
+				fi
+				if [ -f "/$folder_firmware/sec.img" ] && [ -f "/dev/block/bootdevice/by-name/sec" ]; then
+ 					dd if="/$folder_firmware/sec.img" of="/dev/block/bootdevice/by-name/sec" 2>/dev/null
+				fi
+				if [ -f "/$folder_firmware/splash.img" ] && [ -f "/dev/block/bootdevice/by-name/splash" ]; then
+ 					dd if="/$folder_firmware/splash.img" of="/dev/block/bootdevice/by-name/splash" 2>/dev/null
+				fi
+				if [ -f "/$folder_firmware/sti.img" ] && [ -f "/dev/block/bootdevice/by-name/sti" ]; then
+ 					dd if="/$folder_firmware/sti.img" of="/dev/block/bootdevice/by-name/sti" 2>/dev/null
+				fi
+				if [ -f "/$folder_firmware/storesec.img" ] && [ -f "/dev/block/bootdevice/by-name/storesec" ]; then
+ 					dd if="/$folder_firmware/storesec.img" of="/dev/block/bootdevice/by-name/storesec" 2>/dev/null
+				fi
+				if [ -f "/$folder_firmware/switch.img" ] && [ -f "/dev/block/bootdevice/by-name/switch" ]; then
+ 					dd if="/$folder_firmware/switch.img" of="/dev/block/bootdevice/by-name/switch" 2>/dev/null
+				fi
+				if [ -f "/$folder_firmware/toolsfv.img" ] && [ -f "/dev/block/bootdevice/by-name/toolsfv" ]; then
+ 					dd if="/$folder_firmware/toolsfv.img" of="/dev/block/bootdevice/by-name/toolsfv" 2>/dev/null
+				fi
+				if [ -f "/$folder_firmware/tz.img" ] && [ -f "/dev/block/bootdevice/by-name/tz" ]; then
+ 					dd if="/$folder_firmware/tz.img" of="/dev/block/bootdevice/by-name/tz" 2>/dev/null
+				fi
+				if [ -f "/$folder_firmware/vmeta.img" ] && [ -f "/dev/block/bootdevice/by-name/vmeta" ]; then
+ 					dd if="/$folder_firmware/vmeta.img" of="/dev/block/bootdevice/by-name/vmeta" 2>/dev/null
+				fi
+				if [ -f "/$folder_firmware/xbl.img" ] && [ -f "/dev/block/bootdevice/by-name/xbl" ]; then
+ 					dd if="/$folder_firmware/xbl.img" of="/dev/block/bootdevice/by-name/xbl" 2>/dev/null
+				fi
+				exit
+			;;
+			# FLASH BLUETOOTH
+			--btfm|--bluetooth|-btfm|-bluetooth|btfm|bluetooth)
+				if [ -f "/$folder_firmware/bluetooth.img" ] && [ -f "/dev/block/bootdevice/by-name/bluetooth" ]; then
+					dd if="/$folder_firmware/bluetooth.img" of="/dev/block/bootdevice/by-name/bluetooth"
+				fi
+				exit
+			;;
+			# FLASH BOOT
+			--boot|-boot|boot)
+				if [ -f "/$folder_firmware/boot.img" ] && [ -f "/dev/block/bootdevice/by-name/boot" ]; then
+					dd if="/$folder_firmware/boot.img" of="/dev/block/bootdevice/by-name/boot"
+				fi
+				exit
+			;;
+			# FLASH MODEM
+			--non-hlos|--modem|-non-hlos|-modem|non-hlos|modem)
+				if [ -f "/$folder_firmware/modem.img" ] && [ -f "/dev/block/bootdevice/by-name/modem" ]; then
+					dd if="/$folder_firmware/modem.img" of="/dev/block/bootdevice/by-name/modem"
+				fi
+				exit
+			;;
+			# FLASH MODEM1
+			--efs1|--modemst1|-efs1|-modemst1|efs1|modemst1)
+				if [ -f "/$folder_firmware/modemst1.img" ] && [ -f "/dev/block/bootdevice/by-name/modemst1" ]; then
+					dd if="/$folder_firmware/modemst1.img" of="/dev/block/bootdevice/by-name/modemst1"
+				fi
+				exit
+			;;
+			# FLASH MODEM2
+			--efs2|--modemst2|-efs2|-modemst2|efs2|modemst2)
+				if [ -f "/$folder_firmware/modemst2.img" ] && [ -f "/dev/block/bootdevice/by-name/modemst2" ]; then
+					dd if="/$folder_firmware/modemst2.img" of="/dev/block/bootdevice/by-name/modemst2"
+				fi
+				exit
+			;;
+			# FLASH PERSIST
+			--persist|-persist|persist)
+				if [ -f "/$folder_firmware/persist.img" ] && [ -f "/dev/block/bootdevice/by-name/persist" ]; then
+					dd if="/$folder_firmware/persist.img" of="/dev/block/bootdevice/by-name/persist"
+				fi
+				exit
+			;;
+			# FLASH PERSISTBAK
+			--persistbak|-persistbak|persistbak)
+				if [ -f "/$folder_firmware/persistbak.img" ] && [ -f "/dev/block/bootdevice/by-name/persistbak" ]; then
+					dd if="/$folder_firmware/persistbak.img" of="/dev/block/bootdevice/by-name/persistbak"
+				fi
+				exit
+			;;
+			# FLASH RECOVERY
+			--recovery|-recovery|recovery)
+				if [ -f "/$folder_firmware/recovery.img" ] && [ -f "/dev/block/bootdevice/by-name/recovery" ]; then
+					dd if="/$folder_firmware/recovery.img" of="/dev/block/bootdevice/by-name/recovery"
+				fi
+				exit
+			;;
+			# FLASH SPLASH
+			--splash|-splash|splash)
+				if [ -f "/$folder_firmware/splash.img" ] && [ -f "/dev/block/bootdevice/by-name/splash" ]; then
+					dd if="/$folder_firmware/splash.img" of="/dev/block/bootdevice/by-name/splash"
+				fi
+				exit
+			;;
+			# FLASH TZ
+			--tz|-tz|tz)
+				if [ -f "/$folder_firmware/tz.img" ] && [ -f "/dev/block/bootdevice/by-name/tz" ]; then
+					dd if="/$folder_firmware/tz.img" of="/dev/block/bootdevice/by-name/tz"
+				fi
+				exit
+			;;
+			# FLASH VMETA
+			--vmeta|-vmeta|vmeta)
+				if [ -f "/$folder_firmware/vmeta.img" ] && [ -f "/dev/block/bootdevice/by-name/vmeta" ]; then
+					dd if="/$folder_firmware/vmeta.img" of="/dev/block/bootdevice/by-name/vmeta"
+				fi
+				exit
+			;;
+			# FLASH CUSTOM
+			--custom|--c|-custom|-c|custom|c)
+				case "${3}" in
+					# FLASH CUSTOM HELP
+					---help|---h|--help|--h|-help|-h|help|h|"")
+						text_fch
+						exit
+					;;
+					# FLASH CUSTOM USAGE
+					"${3}")
+						case "${4}" in
+							"")
+								echo "Отсутствует аргумент: ${3}.img"
+								exit
+							;;
+							"${4}")
+								if [ -f "/$folder_firmware/${3}.img" ] && [ -f "/dev/block/bootdevice/by-name/${4}" ]; then
+									dd if="/$folder_firmware/${3}.img" of="/dev/block/bootdevice/by-name/${4}"
+									exit
+								else
+									echo "Неверный путь: /dev/block/bootdevice/by-name/${4}"
+									exit
+								fi
+							;;
+						esac
+					;;
+				esac
+			;;
+		esac
+	;;
+	## LIST
+	-list|-l|list|l)
+		case "${2}" in
+			# LIST HELP
+			--help|--h|-help|-h|help|h|"")
+				text_lh
+				exit
+			;;
+			# LIST FULL
+			--full|--f|-full|-f|full|f)
+				find "/cust" "/system" "/vendor" -type f 2>/dev/null | sort -d
+				exit
+			;;
+			# LIST APPS
+			--apps|--a|-apps|-a|apps|a)
+				find "/system/app" "/system/data-app/" "/system/priv-app" "/system/package" "/system/product/app" "/system/product/overly" "/system/product/priv-app" "/vendor/app" "/vendor/data-app" "/vendor/odm/app" "/vendor/odm/overlay" "/vendor/odm/priv-app" "/vendor/overlay" "/vendor/package" -name *.apk -type f 2>/dev/null | sort -d
+				exit
+			;;
+			# LIST BINARIES
+			--binaries|--b|-binaries|-b|binaries|b)
+				find "/system/bin" "/system/product/bin" "/system/product/xbin" "/system/xbin" "/vendor/bin" "/vendor/odm/bin" -type f 2>/dev/null | sort -d
+				exit
+			;;
+			# LIST ETC
+			--etc|--e|-etc|-e|etc|e)
+				find "/system/addon.d" "/system/etc" "/system/product/etc" "/system/usr" "/vendor/etc" "/vendor/odm/etc" "/vendor/usr" -type f 2>/dev/null | sort -d
+				exit
+			;;
+			# LIST LIBRARIES
+			--libraries|--l|-libraries|-l|libraries|l)
+				find "/system/lib" "/system/lib64" "/system/product/lib" "/system/product/lib64" "/vendor/lib" "/vendor/lib64" "/vendor/odm/lib" "/vendor/odm/lib64" -type f 2>/dev/null | sort -d
+				exit
+			;;
+			# LIST PERMISSIONS
+			--permissions|--p|-permissions|-p|permissions|p)
+				(
+					echo "Приложения:"
+					echo "[Без разрешения 0644 или группы 0]"
+					find "/system/app" "/system/data-app/" "/system/priv-app" "/system/package" "/system/product/app" "/system/product/overly" "/system/product/priv-app" "/vendor/app" "/vendor/data-app" "/vendor/odm/app" "/vendor/odm/overlay" "/vendor/odm/priv-app" "/vendor/overlay" "/vendor/package" -type f ! -perm 0644 -o -type f ! -user root -o -type f ! -group root -o -mindepth 2 -type d ! -perm 0755 -o -mindepth 2 -type d ! -user root -o -mindepth 2 -type d ! -group root 2>/dev/null | sort -d
+					echo ""
+					echo "Бинарные файлы:"
+					echo "[Без разрешения 0755 или группы 2000]"
+					find "/system/bin" "/system/product/bin" "/system/product/xbin" "/system/xbin" "/vendor/bin" "/vendor/odm/bin" -type f ! -perm 0755 -o -type f ! -user root -o -type f ! -group shell 2>/dev/null | sort -d
+					echo ""
+					echo "Конфигурации:"
+					echo "[Без разрешения 0644 или группы 0]"
+					find "/system/addon.d" "/system/etc" "/system/product/etc" "/system/usr" -type f ! -perm 0644 -o -type f ! -user root -o -type f ! -group root -o -type d ! -perm 0755 -o -type d ! -user root -o -type d ! -group root 2>/dev/null | sort -d
+					find "/vendor/etc" "/vendor/odm/etc" "/vendor/usr" -type f ! -perm 0644 -o -type f ! -user root -o -type f ! -group root -o -type d ! -perm 0755 -o -type d ! -user root -o -type d ! -group shell 2>/dev/null | sort -d
+					echo ""
+					echo "Библиотеки:"
+					echo "[Без разрешения 0644 или группы 0]"
+					find "/system/lib" "/system/lib64" "/system/product/lib" "/system/product/lib64" -type f ! -perm 0644 -o -type f ! -user root -o -type f ! -group root -o -type d ! -perm 0755 -o -type d ! -user root -o -type d ! -group root 2>/dev/null | sort -d
+					find "/vendor/lib" "/vendor/lib64" "/vendor/odm/lib" "/vendor/odm/lib64" -type f ! -perm 0644 -o -type f ! -user root -o -type f ! -group root -o -type d ! -perm 0755 -o -type d ! -user root -o -type d ! -group shell 2>/dev/null | sort -d
+				) >"/${folder_backup}/permissions-list.txt"
+				cat "/${folder_backup}/permissions-list.txt"
+				exit
+			;;
+			# LIST SYMLINKS
+			--symlinks|--s|-symlinks|-s|symlinks|s)
+				find "/data/adb" "/data/dalvik-cache" "/data/local" "/system" "/vendor" -type l 2>/dev/null | sort -d
+				exit
+			;;
+			# LIST CUSTOM
+			--custom|--c|-custom|-c|custom|c)
+				case "${3}" in
+					# LIST CUSTOM HELP
+					---help|---h|--help|--h|-help|-h|help|h|"")
+						text_lch
+						exit
+					;;
+					# LIST CUSTOM USAGE
+					"${3}")
+						if [ -f "/$folder_backup/${3}.tar.gz" ]; then
+							tar --list --file "/$folder_backup/${3}.tar.gz" | sort -d
+							exit
+						else
+							if [ -d "${3}" ]; then
+								find "${3}" -type f -o -type d -o -type l | sort -d
+								exit
+							else
+								echo "Неверный путь: ${3}"
+								exit
+							fi
+						fi
+					;;
+				esac
+			;;
+		esac
+	;;
+	## READ-UID
+	-read-permissions|read-permissions|-read-uid|read-uid)
+		(
+			echo "Приложения:"
+			echo "[Без разрешения 0644 или группы 0]"
+			find "/system/app" "/system/data-app/" "/system/priv-app" "/system/package" "/system/product/app" "/system/product/overly" "/system/product/priv-app" "/vendor/app" "/vendor/data-app" "/vendor/odm/app" "/vendor/odm/overlay" "/vendor/odm/priv-app" "/vendor/overlay" "/vendor/package" -type f ! -perm 0644 -o -type f ! -user root -o -type f ! -group root -o -mindepth 2 -type d ! -perm 0755 -o -mindepth 2 -type d ! -user root -o -mindepth 2 -type d ! -group root 2>/dev/null | sort -d
+			echo ""
+			echo "Бинарные файлы:"
+			echo "[Без разрешения 0755 или группы 2000]"
+			find "/system/bin" "/system/product/bin" "/system/product/xbin" "/system/xbin" "/vendor/bin" "/vendor/odm/bin" -type f ! -perm 0755 -o -type f ! -user root -o -type f ! -group shell 2>/dev/null | sort -d
+			echo ""
+			echo "Конфигурации:"
+			echo "[Без разрешения 0644 или группы 0]"
+			find "/system/addon.d" "/system/etc" "/system/product/etc" "/system/usr" -type f ! -perm 0644 -o -type f ! -user root -o -type f ! -group root -o -type d ! -perm 0755 -o -type d ! -user root -o -type d ! -group root 2>/dev/null | sort -d
+			find "/vendor/etc" "/vendor/odm/etc" "/vendor/usr" -type f ! -perm 0644 -o -type f ! -user root -o -type f ! -group root -o -type d ! -perm 0755 -o -type d ! -user root -o -type d ! -group shell 2>/dev/null | sort -d
+			echo ""
+			echo "Библиотеки:"
+			echo "[Без разрешения 0644 или группы 0]"
+			find "/system/lib" "/system/lib64" "/system/product/lib" "/system/product/lib64" -type f ! -perm 0644 -o -type f ! -user root -o -type f ! -group root -o -type d ! -perm 0755 -o -type d ! -user root -o -type d ! -group root 2>/dev/null | sort -d
+			find "/vendor/lib" "/vendor/lib64" "/vendor/odm/lib" "/vendor/odm/lib64" -type f ! -perm 0644 -o -type f ! -user root -o -type f ! -group root -o -type d ! -perm 0755 -o -type d ! -user root -o -type d ! -group shell 2>/dev/null | sort -d
+		) >"/${folder_backup}/permissions-list.txt"
+		cat "/${folder_backup}/permissions-list.txt"
+		exit
+	;;
+	
+	## TIME
+	-time|-t|time|t)
+		case "${2}" in
+			# TIME FULL
+			--full|--f|-full|-f|full|f)
+				find "/cust" "/data/adb" "/data/local" "/data/tmp" "/system" "/vendor" -type d -o -type f | while read object; do
+					touch -c -t201001010000.00 "$object"
+				done
+				find "/cust" "/data" "/system" "/vendor" -type l | while read symlink; do
+					touch -ch -t201001010100.00 "$symlink"
+				done
+				exit
+			;;
+			# TIME FILES
+			--files|-files|files)
+				find "/cust" "/data/adb" "/data/local" "/data/tmp" "/system" "/vendor" -type f | while read file; do
+					touch -c -t201001010000.00 "${file}"
+				done
+				exit
+			;;
+			# TIME FOLDERS
+			--folders|-folders|folders)
+				find "/cust" "/data/adb" "/data/local" "/data/tmp" "/system" "/vendor" -type d | while read folder; do
+					touch -c -t201001010000.00 "${folder}"
+				done
+				exit
+			;;
+			# TIME SYMLINKS
+			--symlinks|--s|-symlinks|-s|symlinks|s)
+				find "/cust" "/data" "/system" "/vendor" -type l | while read symlink; do
+					touch -ch -t201001010100.00 "$symlink"
+				done
+				exit
+			;;
+			# TIME CUSTOM
+			--custom|--c|-custom|-c|custom|c)
+				case "${3}" in
+					# TIME CUSTOM HELP
+					"")
+						echo "Метка времени: -time --cystom [путь]"
+						echo ""
+						echo "Пример: borovets -t --c \"./data/adb\""
+						echo "Команда: touch -t201001010000.00 \"./data/adb\""
+						exit
+					;;
+					# TIME CUSTOM USAGE
+					"${3}")
+						find "${3}" -type d -o -type f | while read folder; do
+							touch -c -tt201001010100.00 "${folder}"
+						done
+						find "${3}" -type l | while read symlink; do
+							touch -ch -t201001010100.00 "$symlink"
+						done
+						exit
+					;;
+				esac
+			;;
+			# TIME HELP
+			--help|--h|-help|-h|help|h|*)
+				text_th
+				exit
+			;;
+		esac
+	;;
+	## VERSION
+	-version|-v|version|v)
+		text_v
+		exit
+	;;
+	# HELP
+	-help|-h|help|h|*)
+		text_h
+		echo ""
+		text_bh
+		echo ""
+		text_rh
+		echo ""
+		text_dh
+		echo ""
+		text_fh
+		echo ""
+		text_lh
+		echo ""
+		text_th
+		echo ""
+		text_v
+		exit
+	;;
+esac

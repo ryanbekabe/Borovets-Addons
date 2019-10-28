@@ -1,0 +1,3 @@
+### BOROVETS SCRIPT
+
+exec borovets dump "$@"

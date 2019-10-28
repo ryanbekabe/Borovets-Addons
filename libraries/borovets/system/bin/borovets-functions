@@ -1,0 +1,121 @@
+### BOROVETS SCRIPT
+
+## BUILD
+
+# BUILD DEFAULT
+
+script_home="${0}"
+script_folder="$(cd $(dirname ${0}); pwd)"
+script_name="${0##*/}"
+
+## BUILD SYSTEM
+
+if [ -d "/system/system" ]; then
+	system="system/system"
+	vendor="vendor"
+else
+	system="system"
+	vendor="vendor"
+fi
+
+# BUILD VERSION
+
+script_date="2019.11.01"
+script_version="10.1"
+
+## BINARY
+
+# BINARY BUSYBOX
+
+if [ -f "$script_folder/busybox" ]; then
+	busybox="$script_folder/busybox"
+else
+	if [ -f "/$system/xbin/busybox" ]; then
+		busybox="/$system/xbin/busybox"
+	else
+		busybox="busybox"
+	fi
+fi
+
+# BINARY TOYBOX
+
+if [ -f "$script_folder/toybox" ]; then
+	toybox="$script_folder/toybox"
+else
+	if [ -f "/$system/bin/toybox" ]; then
+		toybox="/$system/bin/toybox"
+	else
+		toybox="toybox"
+	fi
+fi
+
+# BINARY COMMANDS
+
+cat="$toybox cat"
+chmod="$toybox chmod"
+chown="$toybox chown"
+cut="$toybox cut"
+date="$toybox date"
+date_read="$($date +"%Y.%m.%d - %H:%M:%S")"
+echo="$toybox echo"
+egrep="$toybox egrep"
+find="$toybox find"
+grep="$toybox grep"
+ls="$toybox ls"
+mkdir="$toybox mkdir"
+mount="$toybox mount"
+rm="$toybox rm"
+sed="$toybox sed"
+test="$busybox test"
+umount="$toybox umount"
+
+## FOLDER
+
+# FOLDER BUILD
+
+if [ -d "/storage/1FD1-1DEF" ]; then
+	storage="storage/1FD1-1DEF"
+else
+	if [ -d "/external_sd" ]; then
+		storage="external_sd"
+	else
+		if [ -d "/sdcard1" ]; then
+			storage="sdcard1"
+		else
+			storage="sdcard"
+		fi
+	fi
+fi
+
+folder_repository="$storage/[BOROVETS]"
+folder_project="$folder_repository/ADDONS"
+folder_libraries="$folder_project/libraries"
+
+folder_twrp="$storage/TWRP"
+folder_borovets="$folder_twrp/BOROVETS"
+folder_backup="$folder_borovets/BACKUP"
+folder_firmware="$folder_borovets/FIRMWARE"
+folder_profile="$folder_borovets/PROFILE"
+
+# FOLDER CHECK
+
+if [ ! -d "/$folder_twrp" ]; then
+	mkdir "/$folder_twrp"
+fi
+
+if [ ! -d "/$folder_backup" ]; then
+	mkdir -p "/$folder_backup"
+fi
+
+if [ ! -d "/$folder_firmware" ]; then
+	mkdir -p "/$folder_firmware"
+fi
+
+if [ ! -d "/$folder_profile" ]; then
+	mkdir -p "/$folder_profile"
+fi
+
+# FOLDER PERMISSIONS
+
+chown 0.0 "/$folder_twrp"
+chmod 0777 "/$folder_twrp"

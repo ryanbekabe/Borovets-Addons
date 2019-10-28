@@ -1,0 +1,7 @@
+# /system/etc/bash/bashrc
+
+cu() {
+	coreutils --coreutils-prog=${@}
+}
+
+[ -f "/system/etc/bash.bashrc" ] && . /system/etc/bash.bashrc

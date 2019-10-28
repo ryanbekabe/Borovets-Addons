@@ -1,0 +1,39 @@
+# Minimal /system/etc/mkshrc for Android
+
+: ${TERM:=vt100} ${HOME:=/} ${MKSH:=/system/bin/sh} ${HOSTNAME:=android}
+: ${SHELL:=$MKSH} ${USER:=$(typeset x=$(id); x=${x#*\(}; print -r -- ${x%%\)*})}
+
+if (( USER_ID )); then
+	PS1=' $'
+else
+	PS1=' #'
+fi
+
+function precmd {
+	typeset e=$?
+	(( e )) && print -n "ID: $e > "
+}
+
+PS1='$(precmd)$USER@$HOSTNAME'"$PS1 "
+
+export HOME HOSTNAME MKSH SHELL TERM USER
+
+alias l='ls'
+alias la='l -a'
+alias ll='l -l'
+alias lo='l -a -l'
+
+for p in ~/.bin; do
+	[[ -d $p/. ]] || continue
+	[[ :$PATH: = *:$p:* ]] || PATH=$p:$PATH
+done
+
+unset p
+
+: place customizations above this line
+
+cu() {
+	coreutils --coreutils-prog=${@}
+}
+
+bash

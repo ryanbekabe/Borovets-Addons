@@ -1,0 +1,70 @@
+﻿#!/system/bin/sh
+
+# BOROVETS SCRIPT
+
+script_date="2019.10.01"
+script_version="10.0"
+
+script_home="${0}"
+script_folder="$(cd "$(dirname "${0}")"; pwd)"
+script_name="${0##*/}"
+
+# HELP
+text_h() {
+	echo "read-code ${script_version}"
+	echo "[Мэта-данные и заголовки с указанного файла]"
+}
+
+# VERSION
+text_v() {
+	echo "О скрипте: read-code"
+	echo ""
+	echo "Скрипт: ${script_home}"
+	echo ""
+	echo "Версия: ${script_version}"
+	echo "Дата сборки: ${script_date}"
+	echo "Разработчик: Evgeniy Borovets"
+	echo "Поддержка: stein.borovets@gmail.com"
+	echo "Исходный код: https://github.com/borovets"
+	echo ""
+	echo "© Borovets Original, 2014-2020"
+}
+
+case "${1}" in
+	# HELP
+	--help|--h|-help|-h|help|h|"")
+		text_h
+		echo ""
+		text_v
+		exit
+	;;
+	# VERSION
+	--version|--v|-version|-v|version|v)
+		text_v
+		exit
+	;;
+	# READ
+	/*|*)
+		if [ -f "${1}" ]; then
+			case "${1}" in
+				/*|*)
+					echo "Файл: ${1}"
+					echo ""
+					echo "Чтение заголовков:"
+					echo "[Обработчик команды: readelf]"
+					echo ""
+					readelf -a "${1}" | grep -Eiw "Class:.+|Version:.+|OS/ABI:.+|Type:.+|Machine:.+|Flags:.+|OS:.+|ABI:.+|Attribute Section:.+|Requesting program interpreter:.+|library:.+|Tag_CPU:.+|Tag_ARM:.+|Tag_THUMB:.+|Tag_FP:.+|Tag_Advanced:.+|Tag_ABI:.+|Tag_ABI:.+|NT_VERSION:.+|NT_GNU:.+|Build ID:" | sed "s/\t */ /g; s/  */ /g; s/^ *//g" | sort -d
+					echo ""
+					echo "Чтение строк:"
+					echo "[Обработчик команды: strings]"
+					echo ""
+					strings "${1}" | grep -Eiw "/data/|/ld-|/linker/|/sh|Android|API|build|release|SDK|termux|ftp:|http:|www.|Compiled|GCC|GNU|aeabi|gold|linux|XZ|Version|version" | sed "s/\t */ /g; s/  */ /g; s/^ *//g" | sort -d
+					exit
+				;;
+			esac
+		else
+			echo "Файл отсутствует: ${1}"
+			exit
+		fi
+	;;
+esac

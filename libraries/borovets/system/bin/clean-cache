@@ -1,0 +1,58 @@
+#!/system/bin/sh
+
+# BOROVETS SCRIPT
+
+script_date="2019.10.01"
+script_version="10.0"
+
+script_home="${0}"
+script_folder="$(cd "$(dirname "${0}")"; pwd)"
+script_name="${0##*/}"
+
+rm -R "/data/data/*/app_chrome/Default/Service Worker/CacheStorage"
+rm -R "/data/data/*/app_chrome/Default/Service Worker/ScriptCache/"
+rm -R "/data/data/*/cache/Code Cache"
+rm -R "/data/data/*/cache/Crash Reports"
+rm -R "/data/data/*/cache/Offline Pages"
+rm -R "/data/data/*/files/*/Crash Reports"
+rm -R /data/data/*/app_acra-reports
+rm -R /data/data/*/app_chrome/GrShaderCache/GPUCache
+rm -R /data/data/*/app_chrome/ShaderCache
+rm -R /data/data/*/cache/Cache
+rm -R /data/data/*/cache/Crashpad
+rm -R /data/data/*/cache/WebView
+rm -R /data/data/*/cache/api-cache
+rm -R /data/data/*/cache/app_ok_http_cache
+rm -R /data/data/*/cache/bugsnag-errors
+rm -R /data/data/*/cache/cronet-async
+rm -R /data/data/*/cache/cronet-gcore-cache/disk_cache
+rm -R /data/data/*/cache/cronet_metadata_cache/disk_cache
+rm -R /data/data/*/cache/fresco_cache
+rm -R /data/data/*/cache/image_cache
+rm -R /data/data/*/cache/image_manager_disk_cache
+rm -R /data/data/*/cache/org.chromium.android_webview
+rm -R /data/data/*/cache/picasso-cache
+rm -R /data/data/*/cache/raven-buffered-events
+rm -R /data/data/*/cache/thumbs
+rm -R /data/data/*/files/*/*/crashes
+rm -R /data/data/*/files/.Fabric
+rm -R /data/data/*/files/.TwitterSdk
+rm -R /data/data/*/files/.gms-dynamite-code-cache
+rm -R /data/data/*/files/.localytics
+rm -R /data/data/*/files/.um
+rm -R /data/data/*/files/firebase
+rm -R /data/data/*/shaders
+rm -R /data/media/0/Android/data/*/files/cache
+rm -f /data/data/*/app_chrome/Default/GPUCache/*
+rm -f /data/data/*/cache/image_cache/*
+rm -f /data/data/*/cache/logs/*/*
+rm -f /data/data/*/databases/google_analytics*
+rm -f /data/data/*/files/bugreports/*
+rm -f /data/data/*/files/crash_reports
+rm -f /data/data/*/shared_prefs/com.crashlytics*
+rm -f /data/system/dropbox/*
+rm -f /data/system/uiderrors.txt
+rm -f /data/system_ce/0/recent_tasks/*
+rm -f /data/system_ce/0/snapshots/*
+rm -f /data/tombstones/*
+rm -f /data/vendor/tombstones/wifi/*

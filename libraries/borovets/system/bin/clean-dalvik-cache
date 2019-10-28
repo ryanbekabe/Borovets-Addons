@@ -1,0 +1,24 @@
+#!/system/bin/sh
+
+# BOROVETS SCRIPT
+
+script_date="2019.10.01"
+script_version="10.0"
+
+script_home="${0}"
+script_folder="$(cd "$(dirname "${0}")"; pwd)"
+script_name="${0##*/}"
+
+if [ -d "/data/app" ]; then
+	rm -fR /data/app/*/oat
+fi
+
+if [ -d "/data/dalvik-cache/arm" ]; then
+	rm -fR /data/dalvik-cache/arm/system@app*
+	rm -fR /data/dalvik-cache/arm/system@priv-app*
+fi
+
+if [ -d "/data/dalvik-cache/arm64" ]; then
+	rm -fR /data/dalvik-cache/arm64/system@app*
+	rm -fR /data/dalvik-cache/arm64/system@priv-app*
+fi

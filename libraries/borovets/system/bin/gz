@@ -1,0 +1,44 @@
+﻿#!/system/bin/sh
+
+# BOROVETS SCRIPT
+
+script_date="2019.10.01"
+script_version="10.0"
+
+script_home="${0}"
+script_folder="$(cd "$(dirname "${0}")"; pwd)"
+script_name="${0##*/}"
+
+# HELP
+text_h() {
+	echo "GZ ${script_version}"
+	echo "[Сжатие данных в архив *.GZ формата]"
+	echo ""
+	echo "Пример: ${script_name} \"./data/adb/account.db\""
+	echo "Команда: gzip -kNqr9 \"./data/adb/account.db\""
+}
+
+# VERSION
+text_v() {
+	echo "О скрипте: GZ"
+	echo ""
+	echo "Скрипт: ${script_home}"
+	echo ""
+	echo "Версия: ${script_version}"
+	echo "Дата сборки: ${script_date}"
+	echo "Разработчик: Evgeniy Borovets"
+	echo "Поддержка: stein.borovets@gmail.com"
+	echo "Исходный код: https://github.com/borovets"
+	echo ""
+	echo "© Borovets Original, 2014-2020"
+}
+
+if [ ! -z "${1}" ]; then
+	echo "Команда: gzip -Nqr9 \"${1}\""
+	echo " "
+	gzip -kNqr9 "${1}"
+else
+	text_h
+	echo ""
+	text_v
+fi

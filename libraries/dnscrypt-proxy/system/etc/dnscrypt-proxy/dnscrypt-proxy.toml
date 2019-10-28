@@ -1,0 +1,203 @@
+## dnscrypt-proxy configuration
+
+# server_names = ['cloudflare', 'google']
+
+## List of local addresses and ports to listen
+listen_addresses = ['127.0.0.1:53', '[::1]:53']
+
+## Maximum number of simultaneous client connections
+max_clients = 250
+
+## Switch to a non-privileged system user after listening sockets
+# user_name = 'nobody'
+
+# Use servers reachable over IP4
+ipv4_servers = true
+
+# Use servers reachable over IP6
+ipv6_servers = false
+
+# Use servers implementing the DNS Crypt protocol
+dnscrypt_servers = true
+
+# Use servers implementing the DNS-over-HTTPS protocol
+doh_servers = true
+
+# Server must support DNS security extensions (DNSSEC)
+require_dnssec = false
+
+# Server must not log user queries (declarative)
+require_nolog = true
+
+# Server must not enforce its own blacklist
+require_nofilter = true
+
+## Always use TCP to connect to upstream servers
+force_tcp = false
+
+## HTTP / SOCKS proxy
+# proxy = "socks5://127.0.0.1:9050"
+
+## DNS query for a response
+timeout = 2500
+
+## Keepalive for HTTP (HTTPS, HTTP) queries
+keepalive = 30
+
+## Load-balancing strategy
+# lb_strategy = 'p2'
+
+## Log level (0-6, default: 2 - 0 is very verbose, 6 only contains fatal errors)
+# log_level = 2
+
+## Log file for the application
+# log_file = 'dnscrypt-proxy.log'
+
+## Use the system logger
+# use_syslog = true
+
+## Delay, after which certificates are reloaded
+cert_refresh_delay = 240
+
+## Create a new, unique key for every single DNS query
+# dnscrypt_ephemeral_keys = false
+
+## Disable TLS session tickets
+# tls_disable_session_tickets = false
+
+## Specific cipher suite instead of the server preference
+# tls_cipher_suite = [52392, 49199]
+
+## Fallback resolver
+fallback_resolver = '1.1.1.1:53'
+
+## Never let dnscrypt-proxy try to use the system DNS settings
+ignore_system_dns = false
+
+## Maximum time to wait for network connectivity
+netprobe_timeout = 30
+
+## Offline mode
+# offline_mode = false
+
+# Maximum log files size in MB
+log_files_max_size = 3
+
+# How long to keep backup files
+log_files_max_age = 7
+
+# Maximum log files backups to keep
+log_files_max_backups = 1
+
+## Immediately respond to IP6-related queries with an empty response
+block_ipv6 = false
+
+## Map entries
+# forwarding_rules = 'forwarding-rules.txt'
+# cloaking_rules = 'cloaking-rules.txt'
+
+## Enable a DNS cache
+cache = true
+
+## Cache size
+cache_size = 512
+
+## Minimum TTL for cached entries
+cache_min_ttl = 600
+
+## Maximum TTL for cached entries
+cache_max_ttl = 86400
+
+## Minimum TTL for negatively cached entries
+cache_neg_min_ttl = 60
+
+## Maximum TTL for negatively cached entries
+cache_neg_max_ttl = 600
+
+[query_log]
+
+## Path to the query log file
+# file = 'query.log'
+
+## Query log format
+format = 'tsv'
+
+## Do not log these query types, to reduce verbosity
+# ignored_qtypes = ['DNSKEY', 'NS']
+
+[nx_log]
+
+## Path to the query log file
+# file = 'nx.log'
+
+## Query log format
+format = 'tsv'
+
+[blacklist]
+
+## Path to the file of blocking rules
+# blacklist_file = 'blacklist.txt'
+
+## Optional path to a file logging blocked queries
+# log_file = 'blocked.log'
+
+## Optional log format
+# log_format = 'tsv'
+
+[ip_blacklist]
+
+## Path to the file of blocking rules
+# blacklist_file = 'ip-blacklist.txt'
+
+## Optional path to a file logging blocked queries
+# log_file = 'ip-blocked.log'
+
+## Optional log format
+# log_format = 'tsv'
+
+[whitelist]
+
+## Path to the file of whitelisting rules
+# whitelist_file = 'whitelist.txt'
+
+## Optional path to a file logging whitelisted queries
+# log_file = 'whitelisted.log'
+
+## Optional log format
+# log_format = 'tsv'
+
+[schedules]
+
+# [schedules.'time-to-sleep']
+
+# mon = [{after='21:00', before='7:00'}]
+# tue = [{after='21:00', before='7:00'}]
+# wed = [{after='21:00', before='7:00'}]
+# thu = [{after='21:00', before='7:00'}]
+# fri = [{after='23:00', before='7:00'}]
+# sat = [{after='23:00', before='7:00'}]
+# sun = [{after='21:00', before='7:00'}]
+
+# [schedules.'work']
+
+# mon = [{after='9:00', before='18:00'}]
+# tue = [{after='9:00', before='18:00'}]
+# wed = [{after='9:00', before='18:00'}]
+# thu = [{after='9:00', before='18:00'}]
+# fri = [{after='9:00', before='17:00'}]
+
+[sources]
+
+[sources.'public-resolvers']
+
+urls = ['https://raw.githubusercontent.com/DNSCrypt/dnscrypt-resolvers/master/v2/public-resolvers.md', 'https://download.dnscrypt.info/resolvers-list/v2/public-resolvers.md']
+cache_file = 'public-resolvers.md'
+minisign_key = 'RWQf6LRCGA9i53mlYecO4IzT51TGPpvWucNSCh1CBM0QTaLn73Y7GFO3'
+refresh_delay = 72
+prefix = ''
+
+[static]
+
+# [static.'google']
+
+# stamp = 'sdns://AgUAAAAAAAAAAAAOZG5zLmdvb2dsZS5jb20NL2V4cGVyaW1lbnRhbA'

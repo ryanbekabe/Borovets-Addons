@@ -1,0 +1,4 @@
+## Time-based rules
+
+# *.youtube.* @time-to-play
+# facebook.com @play

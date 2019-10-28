@@ -1,0 +1,9 @@
+## Blacklist
+
+banner.*
+banners.*
+creatives.*
+oas.*
+oascentral.*
+stats.*
+telemetry.*

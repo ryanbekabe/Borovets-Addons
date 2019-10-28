@@ -1,0 +1,129 @@
+#!/system/bin/sh
+
+function usage() {
+	[ "$(getprop persist.crossbreeder.cfs)" ] && A=$(getprop persist.crossbreeder.cfs) || A="nothing"
+	[ "$(getprop persist.crossbreeder.dbs)" ] && B=$(getprop persist.crossbreeder.dbs) || B="nothing"
+	[ "$(getprop persist.crossbreeder.ent)" ] && D=$(getprop persist.crossbreeder.ent) || D="nothing"
+	[ "$(getprop persist.crossbreeder.fde)" ] && E=$(getprop persist.crossbreeder.fde) || E="nothing"
+	[ "$(getprop persist.crossbreeder.lmk)" ] && F=$(getprop persist.crossbreeder.lmk) || F="nothing"
+	[ "$(getprop persist.crossbreeder.rdm)" ] && G=$(getprop persist.crossbreeder.rdm) || G="nothing"
+	[ "$(getprop persist.crossbreeder.ui)" ] && J=$(getprop persist.crossbreeder.ui) || J="nothing"
+	[ "$(getprop persist.crossbreeder.vram)" ] && K=$(getprop persist.crossbreeder.vram) || K="nothing"
+	[ "$(getprop persist.crossbreeder.zram)" ] && M=$(getprop persist.crossbreeder.zram) || M="nothing"
+	[ "$(getprop persist.crossbreeder.time)" ] && N=$(getprop persist.crossbreeder.time) || N="nothing"
+echo "Crossbreeder Lite version 2.1.1 settings
+
+Usage: cbconf <option> <value>
+
+Options:
+
+cfs <value>
+	Set cgroup tweak on / off
+	0 = off
+	1 = on
+	Current: $A
+
+dbs <value>
+	Set dynamic power savings on / off
+	0 = off
+	1 = on
+	Current: $B
+
+ent <value>
+	Set entropy generator on / off
+	0 = off
+	1 = on
+	Current: $D
+
+fde <value>
+	Set CPU governor tweak on / off
+	0 = off
+	1 = on
+	Current: $E
+
+lmk <value>
+	Set dynamic LMK tweak on / off
+	0 = off
+	1 = on
+	Current: $F
+
+rdm <value>
+	Set random tweak on / off
+	0 = off
+	1 = on
+	Current: $G
+
+time <value>
+	Set your own value
+	default : 60
+	Current: $N
+
+ui <value>
+	Set ui optimize on / off
+	0 = off
+	1 = on
+	Current: $J
+
+vram <value>
+	Set dynamic vram tweak on / off
+	0 = off
+	1 = on
+	Current: $K
+
+zram <value>
+	Set dynamic vram tweak on / off
+	0 = off
+	1 = on
+	Current: $M
+
+log- Show the log file"
+}
+
+function log() {
+	cat "/cache/crossbreeder.log"
+}
+
+function ask_reboot() {
+	echo "You need reboot to apply changes, reboot now? y / n"
+	read reboot_opt
+	[ "$reboot_opt" == "y" ] || [ "$reboot_opt" == "Y" ] && reboot
+}
+
+case "$1" in
+	cfs)
+		setprop "persist.crossbreeder.cfs" "$2" && sed -i "/persist.crossbreeder.cfs/d" "/system/etc/cbconf.prop" && echo "persist.crossbreeder.cfs $2" >> "/system/etc/cbconf.prop" && ask_reboot
+	;;
+	dbs)
+		setprop "persist.crossbreeder.dbs" "$2" && sed -i "/persist.crossbreeder.dbs/d" "/system/etc/cbconf.prop" && echo "persist.crossbreeder.dbs $2" >> "/system/etc/cbconf.prop" && ask_reboot
+	;;
+	ent)
+		setprop "persist.crossbreeder.ent" "$2" && sed -i "/persist.crossbreeder.ent/d" "/system/etc/cbconf.prop" && echo "persist.crossbreeder.ent $2" >> "/system/etc/cbconf.prop" && ask_reboot
+	;;
+	fde)
+		setprop "persist.crossbreeder.fde" "$2" && sed -i "/persist.crossbreeder.fde/d" "/system/etc/cbconf.prop" && echo "persist.crossbreeder.fde $2" >> "/system/etc/cbconf.prop" && ask_reboot
+	;;
+	lmk)
+		setprop "persist.crossbreeder.lmk" "$2" && sed -i "/persist.crossbreeder.lmk/d" "/system/etc/cbconf.prop" && echo "persist.crossbreeder.lmk $2" >> "/system/etc/cbconf.prop" && ask_reboot
+	;;
+	rdm)
+		setprop "persist.crossbreeder.rdm" "$2" && sed -i "/persist.crossbreeder.rdm/d" "/system/etc/cbconf.prop" && echo "persist.crossbreeder.rdm $2" >> "/system/etc/cbconf.prop" && ask_reboot
+	;;
+	time)
+		setprop "persist.crossbreeder.time" "$2" && sed -i "/persist.crossbreeder.time/d" "/system/etc/cbconf.prop" && echo "persist.crossbreeder.time $2" >> "/system/etc/cbconf.prop" && ask_reboot
+	;;
+	ui)
+		setprop "persist.crossbreeder.ui" "$2" && sed -i "/persist.crossbreeder.ui/d" "/system/etc/cbconf.prop" && echo "persist.crossbreeder.ui $2" >> "/system/etc/cbconf.prop" && ask_reboot
+	;;
+	vram)
+		setprop "persist.crossbreeder.vram" "$2" && sed -i "/persist.crossbreeder.vram/d" "/system/etc/cbconf.prop" && echo "persist.crossbreeder.vram $2" >> "/system/etc/cbconf.prop" && ask_reboot
+	;;
+	zram)
+		setprop "persist.crossbreeder.zram" "$2" && sed -i "/persist.crossbreeder.zram/d" "/system/etc/cbconf.prop" && echo "persist.crossbreeder.zram $2" >> "/system/etc/cbconf.prop" && ask_reboot
+	;;
+	log)
+		log
+	;;
+	*)
+		usage
+	;;
+esac

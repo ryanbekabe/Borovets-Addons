@@ -1,0 +1,19 @@
+#!/system/bin/sh
+
+# sleep 120
+
+echo "Unmounting remotes..."
+
+CONFIGFILE="/system/etc/rclone.conf"
+HOME="/mnt"
+CLOUDROOTMOUNTPOINT="/mnt/cloud"
+
+mkdir -p $CLOUDROOTMOUNTPOINT
+
+rclone listremotes --config ${CONFIGFILE} | cut -f1 -d: |
+	while read line; do
+		echo "Unmounting... $line"
+		umount -f ${CLOUDROOTMOUNTPOINT}/${line}
+		sleep 1
+	done
+echo " - Done"

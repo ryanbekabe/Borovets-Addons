@@ -1,0 +1,15 @@
+#!/system/bin/sh
+
+dir="$(cd "$(dirname "$0")"; pwd)"
+
+trap : INT
+
+echo 1 > "/proc/sys/kernel/kptr_restrict"
+
+$dir/perf.bin "$@"
+
+ret=$?
+
+echo 2 > "/proc/sys/kernel/kptr_restrict"
+
+exit $ret

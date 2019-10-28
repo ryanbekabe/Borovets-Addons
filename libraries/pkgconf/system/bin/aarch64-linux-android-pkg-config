@@ -1,0 +1,8 @@
+#!/system/bin/sh
+
+: ${PKG_CONFIG_LIBDIR=/system/etc/pkgconfig:/data/misc/pkgconfig}
+: ${PKG_CONFIG_SYSTEM_LIBRARY_PATH=/system/lib:/system/lib64} 
+: ${PKG_CONFIG_SYSTEM_INCLUDE_PATH=/system/usr/share}
+export PKG_CONFIG_LIBDIR PKG_CONFIG_SYSTEM_LIBRARY_PATH PKG_CONFIG_SYSTEM_INCLUDE_PATH
+
+exec pkgconf "$@"

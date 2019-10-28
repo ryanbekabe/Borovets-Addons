@@ -1,0 +1,5 @@
+#!/system/bin/bash
+
+# The `checkout` hook script will replace the default checkout routine of the bootstrap.sh script
+
+set -e

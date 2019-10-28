@@ -1,0 +1,7 @@
+#!/system/bin/sh
+
+script_home="${0}"
+script_folder="$(cd "$(dirname "$0")"; pwd)"
+script_name="${0##*/}"
+
+exec ${script_folder}/grep -E "${@}"

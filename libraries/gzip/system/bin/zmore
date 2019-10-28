@@ -1,0 +1,45 @@
+#!/bin/sh
+
+version="zmore (gzip) 1.10
+
+Copyright (C) 2010-2018 Free Software Foundation, Inc.
+This is free software. You may redistribute copies of it under the terms of the GNU General Public License <https://www.gnu.org/licenses/gpl.html>.
+
+Written by Jean-loup Gailly."
+
+usage="Usage: $0 [OPTION]... [FILE]...
+Like 'more', but operate on the uncompressed contents of any compressed FILEs.
+
+Report bugs to <bug-gzip@gnu.org>."
+
+case $1 in
+	--h*)
+		printf '%s\n' "$usage" || exit 1
+		exit
+	;;
+	--v*)
+		printf '%s\n' "$version" || exit 1
+		exit
+	;;
+	--)
+		shift
+	;;
+	-?*)
+		printf >&2 '%s\n' "$0: $1: unknown option; try '$0 --help' for help"
+		exit 1
+	;;
+esac
+
+if test $# = 0; then
+	if test -t 0; then
+		printf >&2 '%s\n' "$0: missing operands; try '$0 --help' for help"
+		exit 1
+	fi
+	set -- -
+fi
+
+for FILE; do
+	test $# -lt 2 ||
+	printf '::::::::::::::\n%s\n::::::::::::::\n' "$FILE" || break
+	gzip -cdfq -- "$FILE"
+done 2 >&1 | eval ${PAGER-more}

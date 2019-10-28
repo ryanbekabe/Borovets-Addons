@@ -1,0 +1,37 @@
+#!/bin/sh
+
+version="gunzip (gzip) 1.10"
+
+usage="Usage: $0 [OPTION]... [FILE]...
+Uncompress FILEs (by default, in-place).
+
+Mandatory arguments to long options are mandatory for short options too.
+
+-c, --stdout - write on standard output, keep original files unchanged
+-f, --force - force overwrite of output file and compress links
+-k, --keep - keep (don't delete) input files
+-l, --list - list compressed file contents
+-n, --no-name - do not save or restore the original name and timestamp
+-N, --name - save or restore the original name and timestamp
+-q, --quiet - suppress all warnings
+-r, --recursive - operate recursively on directories
+-S, --suffix=SUF - use suffix SUF on compressed files
+-t, --test - test compressed file integrity
+-v, --verbose - verbose mode
+--help - display this help and exit
+--version - display version information and exit
+
+With no FILE, or when FILE is -, read standard input."
+
+case $1 in
+	--help)
+		printf '%s\n' "$usage" || exit 1
+		exit
+	;;
+	--version)
+		printf '%s\n' "$version" || exit 1
+		exit
+	;;
+esac
+
+exec gzip -d "$@"

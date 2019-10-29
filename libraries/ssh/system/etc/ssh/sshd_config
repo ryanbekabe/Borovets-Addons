@@ -1,0 +1,110 @@
+# $OpenBSD: sshd_config, 1.101 2017/03/14 07:19:07 djm Exp $
+
+# This sshd was compiled with PATH=/usr/bin:/bin:/usr/sbin:/sbin
+
+# Port 22
+# AddressFamily any
+# ListenAddress 0.0.0.0
+# ListenAddress ::
+
+Protocol 2
+
+# HostKey /data/ssh/ssh_host_key
+HostKey /data/ssh/ssh_host_dsa_key
+HostKey /data/ssh/ssh_host_ecdsa_key
+HostKey /data/ssh/ssh_host_rsa_key
+# HostKey /data/ssh/ssh_host_ed25519_key
+
+# KeyRegenerationInterval 1h
+# ServerKeyBits 1024
+
+# SyslogFacility AUTH
+# LogLevel INFO
+
+# LoginGraceTime 2m
+# StrictModes yes
+# MaxAuthTries 6
+# MaxSessions 10
+# RSAAuthentication yes
+# PubkeyAuthentication yes
+
+AuthorizedKeysFile /data/ssh/authorized_keys
+# AuthorizedPrincipalsFile none
+# AuthorizedKeysCommand none
+# AuthorizedKeysCommandUser nobody
+# RhostsRSAAuthentication no
+
+# HostbasedAuthentication no
+# IgnoreUserKnownHosts no
+# IgnoreRhosts yes
+
+PasswordAuthentication no
+# PermitEmptyPasswords no
+
+# ChallengeResponseAuthentication yes
+
+# KerberosAuthentication no
+# KerberosOrLocalPasswd yes
+# KerberosTicketCleanup yes
+# KerberosGetAFSToken no
+
+# GSSAPIAuthentication no
+# GSSAPICleanupCredentials yes
+
+# UsePAM no
+
+# AllowAgentForwarding yes
+# AllowTcpForwarding yes
+# GatewayPorts no
+
+# X11Forwarding no
+# X11DisplayOffset 10
+# X11UseLocalhost yes
+
+# PrintMotd yes
+# PrintLastLog yes
+# PermitTTY yes
+
+# TCPKeepAlive yes
+# UseLogin no
+# UsePrivilegeSeparation yes
+# PermitUserEnvironment no
+# Compression delayed
+# ClientAliveInterval 0
+# ClientAliveCountMax 3
+
+# PidFile /data/ssh/run/sshd.pid
+# PermitTunnel no
+# ChrootDirectory none
+# MaxStartups 10:30:100
+# UseDNS no
+# VersionAddendum none
+
+# UseLPK yes
+# LpkLdapConf /data/etc/ldap.conf
+# LpkServers ldap://10.1.7.1/ ldap://10.1.7.2/
+# LpkUserDN ou=users,dc=phear,dc=org
+# LpkGroupDN ou=groups,dc=phear,dc=org
+# LpkBindDN cn=Manager,dc=phear,dc=org
+# LpkBindPw secret
+# LpkServerGroup mail
+# LpkFilter (hostAccess=master.phear.org)
+# LpkForceTLS no
+# LpkSearchTimelimit 3
+# LpkBindTimelimit 3
+# LpkPubKeyAttr sshPublicKey
+
+Subsystem sftp /system/bin/sftp-server
+
+# TcpRcvBufPoll yes
+# HPNDisabled no
+# HPNBufferSize 2048
+
+# AllowTcpForwarding no
+# Match User anoncvs
+# ForceCommand cvs server
+# PermitTTY no
+# X11Forwarding no
+
+# AcceptEnv LANG LC_*
+# UsePrivilegeSeparation no

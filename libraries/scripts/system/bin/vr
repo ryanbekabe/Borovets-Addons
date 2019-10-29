@@ -1,0 +1,7 @@
+#!/system/bin/sh
+
+base=/system
+
+export CLASSPATH=$base/framework/vr.jar
+
+exec app_process $base/bin com.android.commands.vr.Vr "$@"

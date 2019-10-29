@@ -1,0 +1,80 @@
+#!/system/bin/sh
+
+export run_base=/data/local/tmp
+export base=/system
+
+if [ ${USER_ID} -ne 0 ]; then
+	tmp_cache=${run_base}/dalvik-cache
+	if [ ! -d ${tmp_cache} ]; then
+		mkdir -p ${tmp_cache}
+	fi
+	export ANDROID_DATA=${run_base}
+fi
+
+cmd=${1}
+
+if [ -z "${1}" ]; then
+	cmd="help"
+fi
+
+if [ -n "${1}" ]; then
+	shift
+fi
+
+CLASSPATH=/system/framework/android.test.runner.jar:${base}/framework/uiautomator.jar
+
+args=
+jars=
+
+if [ "${cmd}" == "runtest" ]; then
+	echo "Warning: This version of UI Automator is deprecated. New tests should be written using"
+	echo "UI Automator 2.0 which is available as part of the Android Testing Support Library."
+	echo "See https://developer.android.com/training/testing/ui-testing/uiautomator-testing.html"
+	while [ true ]; do
+		if [ -z "${1}" ] && [ -z "${jars}" ]; then
+			echo "Error: more parameters expected for runtest; please see usage for details"
+			cmd="help"
+			break
+		fi
+		if [ -z "${1}" ]; then
+			break
+		fi
+		jar=${1}
+		if [ "${1:0:1}" = "-" ]; then
+			break
+		fi
+		if [ "${1:0:1}" != "/" ]; then
+			jar=${run_base}/${1}
+		fi
+		if [ ! -f ${jar} ]; then
+			echo "Error: ${jar} does not exist"
+			cmd="help"
+			break
+		fi
+		jars=${jars}:${jar}
+		shift
+	done
+	while [ -n "${1}" ]; do
+		if [ "${1}" = "--nohup" ]; then
+			trap "" HUP
+			shift
+		else
+			args="${args} ${1}"
+			shift
+		fi
+	done
+else
+	args=${@}
+fi
+
+args="${cmd} ${args}"
+
+if [ -n "${jars}" ]; then
+	args="${args} -e jars ${jars}"
+fi
+
+CLASSPATH=${CLASSPATH}:${jars}
+
+export CLASSPATH
+
+exec app_process ${base}/bin com.android.commands.uiautomator.Launcher ${args}

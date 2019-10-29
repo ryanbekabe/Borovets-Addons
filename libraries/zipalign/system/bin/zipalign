@@ -1,0 +1,26 @@
+#!/system/bin/sh
+
+dir="$(cd "$(dirname "$0")"; pwd)"
+zipalign="/system/bin/zipalign.bin"
+
+CORE_APK=/system/product/app
+SYS_APK=/system/product/priv-app
+LOG_FILE=/data/local/zipalign.log
+
+if [ -e $LOG_FILE ]; then
+	rm $LOG_FILE
+fi;
+
+echo "Starting automatic ZIPAlign $( date +"%m-%d-%Y %H:%M:%S" )" >> $LOG_FILE
+
+for apk in $SYS_APK/*/*.apk; do
+	$zipalign -c -v 4 $apk >> $LOG_FILE
+	echo ZIPAlign completed on $apk >> $LOG_FILE
+done
+
+for apk in $CORE_APK/*/*.apk; do
+	$zipalign -c -v 4 $apk >> $LOG_FILE
+	echo ZIPAlign completed on $apk >> $LOG_FILE
+done
+
+echo "Automatic ZIPAlign finished at $( date +"%m-%d-%Y %H:%M:%S" )" >> $LOG_FILE

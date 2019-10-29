@@ -1,0 +1,99 @@
+#!/system/bin/sh
+
+pat=""
+opt=""
+
+while test $# -ne 0; do
+	case "$1" in
+		-e | -f)
+			opt="$opt $1"
+			shift
+			pat="$1"
+		;;
+		-*)
+			opt="$opt $1"
+		;;
+		 *)
+			if test -z "$pat"; then
+				pat="$1"
+			else
+				break
+			fi
+		;;
+	esac
+	shift
+done
+
+if test $# = 0; then
+	echo usage: `basename "$0"` "[egrep_options] pattern zipfile [members...]"
+	echo "Uses unzip and egrep to search the zip members for a string or pattern."
+	exit 1
+fi
+
+zipfile="$1"
+
+shift
+
+list=0
+silent=0
+
+opt=`echo "$opt" | sed -e 's/ //g' -e 's/-//g'`
+
+case "$opt" in
+	*l*)
+		list=1
+		opt=`echo $opt | sed s/l//`
+	;;
+esac
+
+case "$opt" in
+	*h*)
+		silent=1
+	;;
+esac
+
+if test -n "$opt"; then
+	opt="-$opt"
+fi
+
+status_grep_global=1
+
+IFS='
+'
+
+pat=` echo "$pat" | \
+sed -e 's/\\\\/\\\\\\\\/g' -e 's/|/\\\|/g' -e 's/&/\\\&/g' `
+
+for i in `unzip -Z1 "$zipfile" ${1+"$@"} | sed -e 's/\\\\/\\\\\\\\/g' `; do
+	if test $list -eq 1; then
+		unzip -p-L "$zipfile" "$i" | \
+		egrep $opt "$pat" > /dev/null && echo "$i"
+		status_grep=$?
+	elif test $silent -eq 1; then
+		unzip -p-L "$zipfile" "$i" | \
+		egrep $opt "$pat"
+		status_grep=$?
+	else
+		i=` echo "$i" | \
+		sed -e 's/\\\\/\\\\\\\\/g' -e 's/|/\\\|/g' -e 's/&/\\\&/g' `
+		exec 4>&1
+		status_grep=` ( \
+		( unzip -p-L "$zipfile" "$i" | \
+			egrep $opt "$pat" 1>&4 ; echo $? >&3 ) 4>&1 | \
+			sed "s|^|${i}:|" 1>&4 \
+		) 3>&1 `
+	fi
+	sts=$?
+	test "$status_grep" -eq 0 && status_grep_global=0
+	test "$status_grep" -gt 1 && exit "$status_grep"
+done
+
+if test $sts -eq 0 ; then
+	exit $status_grep_global
+else
+	if test "$status_grep" -gt 1; then
+		exit "$status_grep"
+	else
+		exit $sts
+	fi
+fi

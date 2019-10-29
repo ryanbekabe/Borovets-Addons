@@ -1,0 +1,6 @@
+service webview_zygote64 /system/bin/webview_zygote64
+	user webview_zygote
+	socket webview_zygote stream 660 webview_zygote system
+
+on property:init.svc.zygote=stopped
+	stop webview_zygote64

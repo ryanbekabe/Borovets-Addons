@@ -1,0 +1,3 @@
+#!/system/bin/sh
+
+dalvikvm -Djava.io.tmpdir=. -Xnodex2oat -Xnoimage-dex2oat -cp /system/framework/zipsigner.jar com.topjohnwu.utils.ZipSigner "$@"

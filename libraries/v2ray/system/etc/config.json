@@ -1,0 +1,130 @@
+{
+	"log": {
+		"error": "/data/v2ray/run/error.log",
+		"loglevel": "warning"
+	},
+	"inbounds": [
+		{
+			"port": 65534,
+			"tag": "dns-in",
+			"protocol": "dokodemo-door",
+			"settings": {
+				"port": 53,
+				"address": "1.1.1.1",
+				"network": "tcp,udp"
+			}
+		},
+		{
+			"port": 65535,
+			"listen": "0.0.0.0",
+			"tag": "proxy-inbound",
+			"protocol": "dokodemo-door",
+			"settings": {
+				"network": "tcp,udp",
+				"followRedirect": true
+			},
+			"sniffing": {
+				"enabled": true,
+				"destOverride": [
+					"http",
+					"tls"
+				]
+			}
+		}
+	],
+	"outbounds": [
+		{
+			"protocol": "freedom",
+			"settings": {},
+			"tag": "proxy"
+		},
+		{
+			"protocol": "freedom",
+			"settings": {},
+			"tag": "direct"
+		},
+		{
+			"protocol": "dns",
+			"tag": "dns-out"
+		},
+		{
+			"protocol": "blackhole",
+			"settings": {},
+			"tag": "blocked"
+		}
+	],
+	"routing": {
+		"domainStrategy": "IPOnDemand",
+		"rules": [
+			{
+				"type": "field",
+				"inboundTag": [
+					"dns-in"
+				],
+				"outboundTag": "dns-out"
+			},
+			{
+				"type": "field",
+				"ip": [
+					"geoip:private"
+				],
+				"outboundTag": "direct"
+			},
+			{
+				"type": "field",
+				"ip": [
+					"geoip:cn"
+				],
+				"outboundTag": "direct"
+			},
+			{
+				"type": "field",
+				"domain": [
+					"geosite:cn"
+				],
+				"outboundTag": "direct"
+			},
+			{
+				"type": "field",
+				"domain": [
+					"geosite:category-ads"
+				],
+				"outboundTag": "blocked"
+			}
+		]
+	},
+	"dns": {
+		"hosts": {
+			"domain:v2ray.com": "www.vicemc.net",
+			"domain:github.io": "pages.github.com",
+			"domain:wikipedia.org": "www.wikimedia.org",
+			"domain:shadowsocks.org": "electronicsrealm.com"
+		},
+		"servers": [
+			"1.1.1.1",
+			"8.8.8.8",
+			"9.9.9.9",
+			{
+				"address": "114.114.114.114",
+				"port": 53,
+				"domains": [
+					"geosite:cn"
+				]
+			},
+			"localhost"
+		]
+	},
+	"policy": {
+		"levels": {
+			"0": {
+				"uplinkOnly": 0,
+				"downlinkOnly": 0
+			}
+		},
+		"system": {
+			"statsInboundUplink": false,
+			"statsInboundDownlink": false
+		}
+	},
+	"other": {}
+}
